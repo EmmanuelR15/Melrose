@@ -1,0 +1,19 @@
+{
+  "name": "melrose",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/netlify": "^7.0.6",
+    "@supabase/supabase-js": "^2.39.0",
+    "astro": "^6.1.5",
+    "gsap": "^3.12.2",
+    "lenis": "^1.0.34"
+  }
+}

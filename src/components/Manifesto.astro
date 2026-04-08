@@ -1,0 +1,52 @@
+---
+---
+<section class="manifesto section-gallery">
+  <div class="section-narrow">
+    <p class="manifesto-kicker">MANIFIESTO melrose</p>
+    <h2 class="manifesto-text">
+      CREEMOS EN LA <em>FORMA</em> QUE SIGUE A LA FUNCIÓN, EN EL COLOR QUE EVOCA UNA <em>EMOCIÓN</em> Y EN LA ROPA QUE SE CONVIERTE EN UNA SEGUNDA PIEL. 
+    </h2>
+    <div class="manifesto-line"></div>
+  </div>
+</section>
+
+<style>
+  .manifesto {
+    background: var(--negro);
+    text-align: center;
+    padding: 20vh 0;
+  }
+
+  .manifesto-kicker {
+    font-size: 0.7rem;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: var(--gris);
+    margin-bottom: 3rem;
+  }
+
+  .manifesto-text {
+    font-family: 'Playfair Display', serif; /* Cambiamos a serif para impacto */
+    font-size: clamp(1.5rem, 4vw, 3rem);
+    line-height: 1.6;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--blanco);
+  }
+
+  .manifesto-text em {
+    font-weight: 600;
+    color: var(--rojo);
+    font-style: normal;
+  }
+
+  .manifesto-line {
+    width: 60px;
+    height: 1px;
+    background: var(--rojo);
+    margin: 4rem auto 0;
+  }
+</style>
+
+<!-- Importamos Playfair Display para este componente -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">

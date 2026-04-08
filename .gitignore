@@ -1,0 +1,22 @@
+# Dependencies
+node_modules
+dist
+
+# Astro
+.astro
+
+# IDEs
+.vscode
+.idea
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Netlify
+.netlify
+
+# System files
+.DS_Store
+Thumbs.db

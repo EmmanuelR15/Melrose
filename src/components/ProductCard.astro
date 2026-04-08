@@ -1,0 +1,112 @@
+---
+interface Props {
+  product: {
+    id: string;
+    nombre: string;
+    precio: number;
+    imagen_url: string;
+    categoria: string;
+    descripcion?: string;
+  }
+}
+
+const { product } = Astro.props;
+const formatter = new Intl.NumberFormat('es-AR', {
+  style: 'currency',
+  currency: 'ARS',
+  minimumFractionDigits: 0,
+});
+---
+
+<article class="product-card">
+  <div class="product-image-wrap">
+    <div class="product-image-mask"></div>
+    <img src={product.imagen_url} alt={product.nombre} loading="lazy" class="product-img" />
+  </div>
+  
+  <div class="product-info">
+    <div class="product-header">
+      <h3 class="product-name">{product.nombre}</h3>
+      <p class="product-category">{product.categoria}</p>
+    </div>
+    <p class="product-price">{formatter.format(product.precio)}</p>
+    <button class="add-to-cart" data-id={product.id}>AGREGAR</button>
+  </div>
+</article>
+
+<style>
+  .product-card {
+    background: transparent;
+    border: 1px solid var(--borde);
+    transition: border-color 0.4s ease;
+    width: 100%;
+  }
+
+  .product-card:hover {
+    border-color: var(--rojo);
+  }
+
+  .product-image-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    background: #0f0f0f;
+  }
+
+  .product-image-mask {
+    position: absolute;
+    inset: 0;
+    background: var(--negro);
+    z-index: 2;
+    transform-origin: top;
+    will-change: transform;
+  }
+
+  .product-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transform: scale(1.1);
+    will-change: transform;
+  }
+
+  .product-info {
+    padding: 1.5rem;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .product-name {
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .product-category {
+    font-size: 0.7rem;
+    color: var(--gris);
+    letter-spacing: 0.05em;
+  }
+
+  .product-price {
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+
+  .add-to-cart {
+    background: transparent;
+    border: 1px solid var(--borde);
+    color: var(--blanco);
+    padding: 0.6rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    transition: all 0.3s ease;
+  }
+
+  .add-to-cart:hover {
+    background: var(--rojo);
+    border-color: var(--rojo);
+  }
+</style>

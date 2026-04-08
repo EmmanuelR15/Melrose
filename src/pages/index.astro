@@ -1,0 +1,85 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import Manifesto from '../components/Manifesto.astro';
+import ProductCard from '../components/ProductCard.astro';
+import { supabase } from '../lib/supabase';
+
+// SSR Fetch: Los productos se cargan en el servidor
+const { data: products, error } = await supabase
+  .from('productos')
+  .select('*')
+  .order('created_at', { ascending: false });
+
+if (error) {
+  console.error('[SSR ERROR]', error);
+}
+---
+
+<Layout title="MELROSE | E-commerce Editorial">
+	<main>
+		<Hero />
+    
+    <Manifesto />
+    
+    <section id="productos" class="section-gallery">
+      <div class="section-title section-narrow">
+        <p class="kicker">Catálogo</p>
+        <h2>DROP 01 / 2026</h2>
+      </div>
+
+      <div class="products-grid">
+        {products && products.map((product) => (
+          <ProductCard product={product} />
+        ))}
+      </div>
+    </section>
+	</main>
+</Layout>
+
+<style>
+	main {
+		width: 100%;
+	}
+
+  .section-title {
+    margin-bottom: 5rem;
+    text-align: left;
+  }
+
+  .kicker {
+    font-size: 0.8rem;
+    letter-spacing: 0.3em;
+    color: var(--rojo);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  h2 {
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    line-height: 1;
+  }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 4rem 2rem;
+    padding: 0 5%;
+  }
+
+  /* Editorial Layout: Algunos elementos ocupan ms espacio */
+  @media (min-width: 1024px) {
+    .products-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    
+    .products-grid > :nth-child(odd) {
+      width: 85%;
+    }
+    
+    .products-grid > :nth-child(even) {
+      width: 100%;
+      margin-top: 10rem; /* Escalonado editorial */
+    }
+  }
+</style>

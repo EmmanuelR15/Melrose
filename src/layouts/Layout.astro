@@ -1,0 +1,56 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import '../styles/global.css';
+
+interface Props {
+	title: string;
+	description?: string;
+}
+
+const { title, description = "Melrose - E-commerce Editorial de Alta Gama" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content={description} />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/jpeg" href="/assets/logomelrose.jpg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+
+		<!-- Fuentes -->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+		
+		<ClientRouter />
+
+		<script>
+			import { initAnimations } from '../scripts/animations';
+
+			// Inicialización inicial
+			document.addEventListener('DOMContentLoaded', () => {
+				initAnimations();
+			});
+
+			// Reinicialización después de transiciones de página
+			document.addEventListener('astro:after-swap', () => {
+				initAnimations();
+			});
+		</script>
+	</head>
+	<body>
+		<slot />
+		<div id="customCursor" class="custom-cursor"></div>
+		
+		<style is:global>
+			/* Optimizaciones para View Transitions */
+			::view-transition-old(root),
+			::view-transition-new(root) {
+				animation-duration: 0.5s;
+			}
+		</style>
+	</body>
+</html>
