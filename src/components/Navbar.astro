@@ -1,5 +1,5 @@
 ---
-// Navbar con logo real y links
+// Navbar con menú hamburguesa y acceso a admin
 ---
 
 <nav class="navbar" id="navbar">
@@ -8,12 +8,40 @@
       <img src="/logomelrose.jpg" alt="MELROSE | STW" class="logo-img" />
     </a>
     
-    <div class="nav-links">
+    <div class="nav-links" id="navLinks">
       <a href="#productos">SHOP</a>
       <a href="https://www.instagram.com/melrose.stw/" target="_blank" rel="noopener noreferrer">INSTAGRAM</a>
+      <a href="/admin" class="admin-link">ADMIN</a>
     </div>
+
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
   </div>
 </nav>
+
+<script>
+  // Hamburger menu toggle
+  const hamburger = document.getElementById('hamburger');
+  const navLinks = document.getElementById('navLinks');
+
+  if (hamburger && navLinks) {
+    hamburger.addEventListener('click', () => {
+      navLinks.classList.toggle('active');
+      hamburger.classList.toggle('active');
+    });
+
+    // Close menu when link clicked
+    navLinks.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        navLinks.classList.remove('active');
+        hamburger.classList.remove('active');
+      });
+    });
+  }
+</script>
 
 <style>
   .navbar {
@@ -41,6 +69,7 @@
     align-items: center;
     text-decoration: none;
     height: 40px;
+    z-index: 1001;
   }
 
   .logo-img {
@@ -66,17 +95,69 @@
     color: var(--rojo);
   }
 
+  .admin-link {
+    color: var(--rojo);
+  }
+
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    gap: 5px;
+    z-index: 1001;
+  }
+
+  .hamburger span {
+    width: 24px;
+    height: 2px;
+    background: var(--blanco);
+    transition: all 0.3s ease;
+    display: block;
+  }
+
+  .hamburger.active span:nth-child(1) {
+    transform: rotate(45deg) translate(8px, 8px);
+  }
+
+  .hamburger.active span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .hamburger.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(8px, -8px);
+  }
+
   @media (max-width: 768px) {
     .navbar-container {
       padding: 0 3%;
     }
 
+    .hamburger {
+      display: flex;
+    }
+
     .nav-links {
-      gap: 1.5rem;
+      position: absolute;
+      top: 70px;
+      left: 0;
+      right: 0;
+      background: var(--negro);
+      flex-direction: column;
+      gap: 1rem;
+      padding: 2rem;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      border-bottom: 1px solid var(--borde);
+    }
+
+    .nav-links.active {
+      transform: translateX(0);
     }
 
     .nav-links a {
-      font-size: 0.65rem;
+      font-size: 0.75rem;
     }
 
     .logo-img {
