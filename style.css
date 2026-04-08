@@ -98,10 +98,9 @@ h3 {
 }
 
 .nav-logo {
-  height: 32px;
+  height: 48px; /* Slightly larger for the star detail */
   width: auto;
   display: block;
-  filter: invert(1); /* For white logo on dark navbar */
 }
 
 .nav-links {
