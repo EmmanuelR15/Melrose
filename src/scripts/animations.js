@@ -102,11 +102,11 @@ export function initAnimations() {
       .join("");
 
     const tl = gsap.timeline({ delay: 0.3 });
-    tl.from(heroKicker, { 
-      opacity: 0, 
-      y: 30, 
-      duration: 0.8, 
-      ease: "power3.out" 
+    tl.from(heroKicker, {
+      opacity: 0,
+      y: 30,
+      duration: 0.8,
+      ease: "power3.out",
     });
     tl.from(
       ".char",
@@ -234,4 +234,3 @@ export function initAnimations() {
     });
   }
 }
-

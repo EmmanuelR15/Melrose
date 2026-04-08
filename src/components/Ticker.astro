@@ -1,0 +1,67 @@
+---
+// Ticker marquee component for urban streetwear aesthetic
+---
+
+<section class="ticker">
+  <div class="ticker-content">
+    <div class="ticker-text">
+      <span>STW / DROP 01 / NUEVA TEMPORADA 2026 / STREETWEAR PREMIUM / SILUETAS LIMPIAS / COLOR PROFUNDO / TEXTURA PREMIUM / CIUDAD NOCHE DIARIO / STW / DROP 01 / NUEVA TEMPORADA 2026 / STREETWEAR PREMIUM / SILUETAS LIMPIAS / COLOR PROFUNDO / TEXTURA PREMIUM / CIUDAD NOCHE DIARIO /</span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .ticker {
+    width: 100%;
+    background: var(--negro);
+    border-top: 1px solid var(--borde);
+    border-bottom: 1px solid var(--borde);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .ticker-content {
+    display: flex;
+    align-items: center;
+    height: 40px;
+  }
+
+  .ticker-text {
+    display: flex;
+    white-space: nowrap;
+    animation: scroll 20s linear infinite;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 0.1em;
+    color: var(--rojo);
+    text-transform: uppercase;
+  }
+
+  .ticker-text span {
+    padding: 0 2rem;
+    display: inline-block;
+  }
+
+  @keyframes scroll {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .ticker-content {
+      height: 35px;
+    }
+
+    .ticker-text {
+      font-size: 1rem;
+    }
+
+    .ticker-text span {
+      padding: 0 1.5rem;
+    }
+  }
+</style>

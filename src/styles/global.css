@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap");
+
 :root {
   --negro: #0a0a0a;
   --negro-suave: #141414;
@@ -6,12 +8,7 @@
   --blanco: #f5f5f5;
   --gris: #888888;
   --borde: #222222;
-  --cyan: #00d4ff;
-  --magenta: #ff006e;
-  --neón-verde: #39ff14;
 }
-
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap');
 
 * {
   margin: 0;
@@ -20,21 +17,7 @@
 }
 
 body {
-  background: 
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(200, 200, 200, 0.03) 2px,
-      rgba(200, 200, 200, 0.03) 4px
-    ),
-    radial-gradient(
-      ellipse at 50% 50%,
-      #1a1a1a 0%,
-      var(--negro) 100%
-    ),
-    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="1"/></filter><rect width="100" height="100" fill="%230a0a0a" filter="url(%23noise)" opacity="0.1"/></svg>');
-  background-attachment: fixed;
+  background: var(--negro);
   color: var(--blanco);
   font-family: "Inter", sans-serif;
   line-height: 1.4;
@@ -62,89 +45,43 @@ h1,
 h2,
 h3 {
   font-family: "Bebas Neue", sans-serif;
-  letter-spacing: 0.15em;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-h1 {
-  font-size: clamp(3rem, 12vw, 8rem);
-  line-height: 0.9;
-  text-shadow: 
-    0 0 10px rgba(0, 212, 255, 0.3),
-    0 0 20px rgba(0, 212, 255, 0.2),
-    0 0 30px rgba(255, 0, 110, 0.1);
-  letter-spacing: 0.12em;
-}
-
-h2 {
-  font-size: clamp(1.8rem, 6vw, 4rem);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.11em;
+  font-weight: 400;
 }
 
 .btn-primary {
-  background: transparent;
+  background: var(--rojo);
   color: var(--blanco);
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  font-weight: 700;
-  padding: 1rem 2rem;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  padding: 0.85rem 1.4rem;
   display: inline-block;
-  border: 2px solid var(--cyan);
-  position: relative;
-  overflow: hidden;
-  font-size: 0.8rem;
-  transition: all 0.3s ease;
-  box-shadow: 
-    inset 0 0 10px rgba(0, 212, 255, 0.2),
-    0 0 20px rgba(0, 212, 255, 0);
-}
-
-.btn-primary::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: var(--cyan);
-  transition: left 0.3s ease;
-  z-index: -1;
 }
 
 .btn-primary:hover {
-  color: var(--negro);
-  left: 0;
-  box-shadow: 
-    inset 0 0 20px rgba(0, 212, 255, 0.4),
-    0 0 30px rgba(0, 212, 255, 0.6);
+  background: var(--rojo-oscuro);
 }
 
-.btn-primary:hover::before {
-  left: 0;
-}
-
-/* Custom Cursor */
+/* Custom Cursor Placeholder */
 .custom-cursor {
   position: fixed;
   top: 0;
   left: 0;
   width: 12px;
   height: 12px;
-  background: var(--cyan);
+  background: var(--blanco);
   border-radius: 50%;
   pointer-events: none;
   z-index: 10000;
-  mix-blend-mode: screen;
+  mix-blend-mode: difference;
   transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
   transform: translate(-50%, -50%);
   display: none;
-  box-shadow: 0 0 15px var(--cyan);
 }
 
 .custom-cursor.grow {
-  transform: translate(-50%, -50%) scale(2.5);
-  box-shadow: 0 0 30px var(--cyan);
+  transform: translate(-50%, -50%) scale(2);
 }
 
 @media (min-width: 1025px) {
@@ -161,4 +98,190 @@ h2 {
 .section-narrow {
   max-width: 70%;
   margin: 0 auto;
+}
+
+/* Marquee/Ticker */
+.marquee {
+  background: var(--rojo);
+  color: var(--blanco);
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 1.2rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 1rem 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.marquee-content {
+  display: inline-block;
+  animation: scroll 20s linear infinite;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* Product Grid */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 8rem 4rem;
+  margin-top: 4rem;
+}
+
+@media (max-width: 768px) {
+  .products-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 4rem 2rem;
+  }
+}
+
+/* Filters */
+.filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  background: transparent;
+  border: 1px solid var(--borde);
+  color: var(--blanco);
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filter-btn.active,
+.filter-btn:hover {
+  border-color: var(--rojo);
+  color: var(--rojo);
+}
+
+/* Lookbook */
+.lookbook-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  margin: 4rem 0;
+}
+
+.lookbook-main {
+  position: relative;
+  aspect-ratio: 3/4;
+  overflow: hidden;
+}
+
+.lookbook-side {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 2rem;
+}
+
+.lookbook-item {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.lookbook-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.lookbook-item:hover img {
+  transform: scale(1.05);
+}
+
+.lookbook-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.lookbook-item:hover .lookbook-overlay {
+  opacity: 1;
+}
+
+.lookbook-text {
+  color: var(--blanco);
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 2rem;
+  text-align: center;
+  letter-spacing: 0.1em;
+}
+
+/* About Section */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.about-text h2 {
+  font-size: 3rem;
+  margin-bottom: 2rem;
+  line-height: 1.1;
+}
+
+.about-text p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--gris);
+}
+
+.about-image {
+  position: relative;
+  aspect-ratio: 4/5;
+  overflow: hidden;
+}
+
+.about-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .section-gallery {
+    padding: 8rem 5%;
+  }
+
+  .section-narrow {
+    max-width: 90%;
+  }
+
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .lookbook-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .lookbook-side {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: none;
+  }
 }

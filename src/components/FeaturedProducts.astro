@@ -1,0 +1,88 @@
+---
+import { supabase } from '../lib/supabase.js';
+import ProductCard from './ProductCard.astro';
+
+// Get featured products (first 4 products)
+const { data: featuredProducts } = await supabase
+  .from('productos')
+  .select('*')
+  .limit(4)
+  .order('id', { ascending: false });
+---
+
+<section class="featured-products">
+  <div class="container">
+    <div class="section-header">
+      <h2>DESTACADOS</h2>
+      <p>Las piezas más representativas de la temporada</p>
+    </div>
+
+    <div class="products-grid">
+      {featuredProducts?.map((product) => (
+        <ProductCard product={product} />
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .featured-products {
+    padding: 6rem 0;
+    background: var(--negro);
+    border-top: 1px solid var(--borde);
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .section-header h2 {
+    font-size: clamp(2.5rem, 8vw, 4rem);
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    color: var(--blanco);
+    margin-bottom: 1rem;
+    font-family: 'Bebas Neue', sans-serif;
+  }
+
+  .section-header p {
+    font-size: 1rem;
+    color: var(--gris);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    max-width: 100%;
+  }
+
+  @media (max-width: 768px) {
+    .featured-products {
+      padding: 4rem 0;
+    }
+
+    .container {
+      padding: 0 1rem;
+    }
+
+    .section-header {
+      margin-bottom: 3rem;
+    }
+
+    .products-grid {
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+  }
+</style>

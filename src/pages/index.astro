@@ -1,11 +1,15 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
-import Manifesto from '../components/Manifesto.astro';
+import Ticker from '../components/Ticker.astro';
+import FeaturedProducts from '../components/FeaturedProducts.astro';
+import Lookbook from '../components/Lookbook.astro';
+import About from '../components/About.astro';
 import ProductCard from '../components/ProductCard.astro';
 import { supabase } from '../lib/supabase';
 
 let products = [];
+let categories = ['TODO', 'REMERAS', 'BUZOS', 'PANTALONES', 'ACCESORIOS'];
 
 try {
   if (supabase) {
@@ -24,25 +28,36 @@ try {
 <Layout title="MELROSE | STW">
 	<main>
 		<Hero />
-    
-    <Manifesto />
+		<Ticker />
+		<FeaturedProducts />
+		<Lookbook />
+		<About />
 
-    <section id="productos" class="section-gallery">
-      <div class="section-title section-narrow">
-        <p class="kicker">Catálogo</p>
-        <h2>DROP 01 / 2026</h2>
-      </div>
+		<section id="productos" class="products-section">
+			<div class="container">
+				<div class="section-header">
+					<p class="kicker">CATÁLOGO COMPLETO</p>
+					<h2>DROP 01 / 2026</h2>
+				</div>
 
-      <div class="products-grid">
-        {products.length > 0 ? (
-          products.map((product) => (
-            <ProductCard product={product} />
-          ))
-        ) : (
-          <p class="empty-message">El catálogo está en mantenimiento. Volvé a cargar la página en unos minutos.</p>
-        )}
-      </div>
-    </section>
+				<div class="filters">
+					<button class="filter-btn active" data-filter="TODO">TODO</button>
+					{categories.slice(1).map((category) => (
+						<button class="filter-btn" data-filter={category}>{category}</button>
+					))}
+				</div>
+
+				<div class="products-grid">
+					{products.length > 0 ? (
+						products.map((product) => (
+							<ProductCard product={product} client:load />
+						))
+					) : (
+						<p class="empty-message">El catálogo está en mantenimiento. Volvé a cargar la página en unos minutos.</p>
+					)}
+				</div>
+			</div>
+		</section>
 	</main>
 </Layout>
 
@@ -51,58 +66,130 @@ try {
 		width: 100%;
 	}
 
-  .section-title {
-    margin-bottom: 8rem;
-    text-align: left;
-  }
+	.container {
+		max-width: 1400px;
+		margin: 0 auto;
+		padding: 0 2rem;
+	}
 
-  .section-title h2 {
-    letter-spacing: 0.2em;
-  }
+	.section-header {
+		text-align: center;
+		margin-bottom: 4rem;
+	}
 
-  .kicker {
-    font-size: 0.8rem;
-    letter-spacing: 0.3em;
-    color: var(--rojo);
-    text-transform: uppercase;
-    margin-bottom: 1rem;
-  }
+	.kicker {
+		font-size: 0.8rem;
+		letter-spacing: 0.3em;
+		color: var(--rojo);
+		text-transform: uppercase;
+		margin-bottom: 1rem;
+		font-weight: 600;
+	}
 
-  h2 {
-    font-size: clamp(2.5rem, 8vw, 5rem);
-    line-height: 1;
-  }
+	.section-header h2 {
+		font-size: clamp(2.5rem, 8vw, 5rem);
+		line-height: 1;
+		letter-spacing: 0.1em;
+		font-family: 'Bebas Neue', sans-serif;
+		font-weight: 900;
+		color: var(--blanco);
+	}
 
-  .products-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    gap: 8rem 4rem;
-    padding: 0 8%;
-  }
+	.filters {
+		display: flex;
+		justify-content: center;
+		gap: 1rem;
+		margin-bottom: 3rem;
+		flex-wrap: wrap;
+	}
 
-  .empty-message {
-    grid-column: 1 / -1;
-    text-align: center;
-    font-size: 1rem;
-    color: var(--texto);
-    opacity: 0.8;
-    margin: 4rem 0;
-  }
+	.filter-btn {
+		background: transparent;
+		border: 1px solid var(--borde);
+		color: var(--gris);
+		padding: 0.5rem 1.5rem;
+		font-size: 0.8rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		font-weight: 600;
+	}
 
-  /* Editorial Layout: Algunos elementos ocupan ms espacio */
-  @media (min-width: 1024px) {
-    .products-grid {
-      grid-template-columns: 1fr 1fr;
-      gap: 12rem 6rem;
-    }
-    
-    .products-grid > :nth-child(odd) {
-      width: 90%;
-    }
-    
-    .products-grid > :nth-child(even) {
-      width: 100%;
-      margin-top: 15rem; /* Escalonado editorial */
-    }
-  }
+	.filter-btn:hover,
+	.filter-btn.active {
+		border-color: var(--rojo);
+		color: var(--rojo);
+		background: rgba(192, 57, 43, 0.1);
+	}
+
+	.products-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 2rem;
+		margin-bottom: 6rem;
+	}
+
+	.empty-message {
+		grid-column: 1 / -1;
+		text-align: center;
+		font-size: 1rem;
+		color: var(--gris);
+		opacity: 0.8;
+		margin: 4rem 0;
+	}
+
+	@media (max-width: 768px) {
+		.container {
+			padding: 0 1rem;
+		}
+
+		.section-header {
+			margin-bottom: 3rem;
+		}
+
+		.filters {
+			gap: 0.5rem;
+			margin-bottom: 2rem;
+		}
+
+		.filter-btn {
+			padding: 0.4rem 1rem;
+			font-size: 0.7rem;
+		}
+
+		.products-grid {
+			grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+			gap: 1.5rem;
+			margin-bottom: 4rem;
+		}
+	}
 </style>
+
+<script>
+	// Product filtering functionality
+	document.addEventListener('DOMContentLoaded', () => {
+		const filterButtons = document.querySelectorAll('.filter-btn');
+		const productCards = document.querySelectorAll('.product-card');
+
+		filterButtons.forEach(button => {
+			button.addEventListener('click', () => {
+				// Remove active class from all buttons
+				filterButtons.forEach(btn => btn.classList.remove('active'));
+				// Add active class to clicked button
+				button.classList.add('active');
+
+				const filterValue = button.dataset.filter;
+
+				productCards.forEach(card => {
+					const category = card.querySelector('.product-category').textContent.trim();
+					if (filterValue === 'TODO' || category === filterValue) {
+						card.style.display = 'block';
+					} else {
+						card.style.display = 'none';
+					}
+				});
+			});
+		});
+	});
+</script>

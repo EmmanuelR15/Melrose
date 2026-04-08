@@ -32,19 +32,7 @@ const heroImage = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?
     text-align: center;
     overflow: hidden;
     color: var(--blanco);
-    background: 
-      repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(200, 200, 200, 0.03) 2px,
-        rgba(200, 200, 200, 0.03) 4px
-      ),
-      radial-gradient(
-        ellipse at 50% 50%,
-        #1a1a1a 0%,
-        var(--negro) 100%
-      );
+    background: var(--negro);
   }
 
   .hero-bg {
@@ -63,10 +51,7 @@ const heroImage = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?
   .hero-overlay {
     position: absolute;
     inset: 0;
-    background: 
-      linear-gradient(135deg, rgba(0, 212, 255, 0.03), rgba(255, 0, 110, 0.02)),
-      linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.85));
-    backdrop-filter: blur(0.5px);
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8));
   }
 
   .hero-content {
@@ -82,8 +67,7 @@ const heroImage = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?
     opacity: 0.9;
     text-transform: uppercase;
     animation: fadeInUp 0.8s ease-out;
-    color: var(--cyan);
-    text-shadow: 0 0 10px var(--cyan);
+    color: var(--rojo);
   }
 
   h1 {
@@ -92,7 +76,7 @@ const heroImage = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?
     margin-bottom: 2rem;
     letter-spacing: 0.08em;
     font-weight: 900;
-    animation: textGlitch 1s ease-out 0.2s;
+    animation: fadeInUp 0.8s ease-out 0.2s both;
   }
 
   .hero-description {
@@ -120,34 +104,20 @@ const heroImage = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?
     }
   }
 
-  @keyframes textGlitch {
-    0% {
-      opacity: 0;
-      transform: translate(-5px, 0) skewY(3deg);
-      text-shadow: 
-        2px 0 var(--cyan),
-        -2px 0 var(--magenta),
-        0 0 20px rgba(0, 212, 255, 0.2);
+  @media (max-width: 768px) {
+    .hero-content {
+      padding: 0 1rem;
     }
-    50% {
-      text-shadow: 
-        -2px 0 var(--magenta),
-        2px 0 var(--cyan),
-        0 0 30px rgba(0, 212, 255, 0.3);
+    
+    h1 {
+      font-size: clamp(3rem, 15vw, 8rem);
     }
-    100% {
-      opacity: 1;
-      transform: translate(0) skewY(0deg);
-      text-shadow: 
-        0 0 10px rgba(0, 212, 255, 0.3),
-        0 0 20px rgba(0, 212, 255, 0.2),
-        0 0 30px rgba(255, 0, 110, 0.1);
+    
+    .hero-description {
+      font-size: 0.9rem;
     }
   }
-
-  @media (max-width: 768px) {
-    h1 {
-      animation: none;
+</style>
     }
   }
 </style>
