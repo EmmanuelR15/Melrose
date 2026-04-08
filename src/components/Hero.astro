@@ -32,6 +32,19 @@ const heroImage = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?
     text-align: center;
     overflow: hidden;
     color: var(--blanco);
+    background: 
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(200, 200, 200, 0.03) 2px,
+        rgba(200, 200, 200, 0.03) 4px
+      ),
+      radial-gradient(
+        ellipse at 50% 50%,
+        #1a1a1a 0%,
+        var(--negro) 100%
+      );
   }
 
   .hero-bg {
@@ -50,7 +63,10 @@ const heroImage = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?
   .hero-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.7));
+    background: 
+      linear-gradient(135deg, rgba(0, 212, 255, 0.03), rgba(255, 0, 110, 0.02)),
+      linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.85));
+    backdrop-filter: blur(0.5px);
   }
 
   .hero-content {
@@ -63,7 +79,11 @@ const heroImage = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?
     letter-spacing: 0.7em;
     font-size: 0.8rem;
     margin-bottom: 2rem;
-    opacity: 1;
+    opacity: 0.9;
+    text-transform: uppercase;
+    animation: fadeInUp 0.8s ease-out;
+    color: var(--cyan);
+    text-shadow: 0 0 10px var(--cyan);
   }
 
   h1 {
@@ -71,16 +91,63 @@ const heroImage = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?
     line-height: 0.85;
     margin-bottom: 2rem;
     letter-spacing: 0.08em;
+    font-weight: 900;
+    animation: textGlitch 1s ease-out 0.2s;
   }
 
   .hero-description {
     max-width: 500px;
     margin: 0 auto;
     font-size: 1rem;
-    opacity: 0.8;
+    opacity: 0.85;
+    animation: fadeInUp 0.8s ease-out 0.4s both;
+    line-height: 1.6;
   }
 
   .btn-primary {
     margin-top: 3rem;
+    animation: fadeInUp 0.8s ease-out 0.6s both;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes textGlitch {
+    0% {
+      opacity: 0;
+      transform: translate(-5px, 0) skewY(3deg);
+      text-shadow: 
+        2px 0 var(--cyan),
+        -2px 0 var(--magenta),
+        0 0 20px rgba(0, 212, 255, 0.2);
+    }
+    50% {
+      text-shadow: 
+        -2px 0 var(--magenta),
+        2px 0 var(--cyan),
+        0 0 30px rgba(0, 212, 255, 0.3);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(0) skewY(0deg);
+      text-shadow: 
+        0 0 10px rgba(0, 212, 255, 0.3),
+        0 0 20px rgba(0, 212, 255, 0.2),
+        0 0 30px rgba(255, 0, 110, 0.1);
+    }
+  }
+
+  @media (max-width: 768px) {
+    h1 {
+      animation: none;
+    }
   }
 </style>

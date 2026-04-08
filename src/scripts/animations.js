@@ -56,22 +56,31 @@ export function initAnimations() {
     // Hover suave en Product Cards
     document.querySelectorAll(".product-card").forEach((card) => {
       const img = card.querySelector(".product-img");
+      const nameEl = card.querySelector(".product-name");
 
       card.addEventListener("mouseenter", () => {
         cursor?.classList.add("grow");
         gsap.to(img, {
-          scale: 1.05,
-          duration: 1.2,
+          scale: 1.2,
+          rotate: 1,
+          duration: 0.6,
           ease: "power2.out",
           overwrite: "auto",
         });
+        if (nameEl) {
+          gsap.to(nameEl, {
+            duration: 0.3,
+            ease: "power2.out",
+          });
+        }
       });
 
       card.addEventListener("mouseleave", () => {
         cursor?.classList.remove("grow");
         gsap.to(img, {
-          scale: 1,
-          duration: 1.2,
+          scale: 1.05,
+          rotate: 0,
+          duration: 0.6,
           ease: "power2.out",
           overwrite: "auto",
         });
@@ -79,7 +88,7 @@ export function initAnimations() {
     });
   }
 
-  // 3. Hero Entrance (Split Text manual)
+  // 4. Hero Entrance (Split Text manual con efectos neón)
   const heroTitle = document.getElementById("heroTitle");
   const heroKicker = document.getElementById("heroKicker");
   if (heroTitle) {
@@ -88,12 +97,17 @@ export function initAnimations() {
       .split("")
       .map(
         (char) =>
-          `<span class="char" style="display:inline-block; will-change:transform, opacity;">${char === "\n" ? "<br>" : char === " " ? "&nbsp;" : char}</span>`,
+          `<span class="char" style="display:inline-block; will-change:transform, opacity; text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);">${char === "\n" ? "<br>" : char === " " ? "&nbsp;" : char}</span>`,
       )
       .join("");
 
-    const tl = gsap.timeline({ delay: 0.5 });
-    tl.from(heroKicker, { opacity: 0, y: 30, duration: 1, ease: "power3.out" });
+    const tl = gsap.timeline({ delay: 0.3 });
+    tl.from(heroKicker, { 
+      opacity: 0, 
+      y: 30, 
+      duration: 0.8, 
+      ease: "power3.out" 
+    });
     tl.from(
       ".char",
       {
@@ -101,7 +115,7 @@ export function initAnimations() {
         y: 100,
         rotateX: -90,
         stagger: 0.02,
-        duration: 1,
+        duration: 0.8,
         ease: "power4.out",
       },
       "-=0.4",
@@ -112,16 +126,16 @@ export function initAnimations() {
         opacity: 0,
         y: 30,
         stagger: 0.2,
-        duration: 1,
+        duration: 0.8,
         ease: "power3.out",
       },
-      "-=0.6",
+      "-=0.5",
     );
   }
 
-  // 4. Product Mask Reveals
+  // 5. Product Mask Reveals con micro-animaciones
   const cards = gsap.utils.toArray(".product-card");
-  cards.forEach((card) => {
+  cards.forEach((card, index) => {
     const mask = card.querySelector(".product-image-mask");
     const img = card.querySelector(".product-img");
 
@@ -136,7 +150,7 @@ export function initAnimations() {
     if (mask) {
       tl.to(mask, {
         scaleY: 0,
-        duration: 1.4,
+        duration: 1.2,
         ease: "power4.inOut",
       });
     }
@@ -145,24 +159,79 @@ export function initAnimations() {
       img,
       {
         scale: 1,
-        duration: 1.6,
+        opacity: 1,
+        duration: 1.4,
         ease: "power2.out",
+      },
+      0,
+    );
+
+    // Stagger effect para cada tarjeta
+    tl.from(
+      card,
+      {
+        opacity: 0,
+        y: 20,
+        duration: 0.6,
+        ease: "power3.out",
       },
       0,
     );
   });
 
-  // 5. Parallax Effect for Product Images
+  // 6. Parallax Effect for Product Images (mejorado)
   gsap.utils.toArray(".product-img").forEach((img) => {
     gsap.to(img, {
-      yPercent: -20,
+      yPercent: -25,
       ease: "none",
       scrollTrigger: {
         trigger: img,
         start: "top bottom",
         end: "bottom top",
-        scrub: true,
+        scrub: 0.8,
       },
     });
   });
+
+  // 7. Add to Cart Button Pulse
+  gsap.from(".add-to-cart", {
+    stagger: 0.1,
+    opacity: 0,
+    scale: 0.8,
+    duration: 0.5,
+    ease: "back.out",
+  });
+
+  // 8. Hover effect en botones Add to Cart
+  document.querySelectorAll(".add-to-cart").forEach((btn) => {
+    btn.addEventListener("mouseenter", () => {
+      gsap.to(btn, {
+        scale: 1.08,
+        duration: 0.3,
+        ease: "power2.out",
+        boxShadow: "0 0 30px rgba(0, 212, 255, 0.8)",
+      });
+    });
+
+    btn.addEventListener("mouseleave", () => {
+      gsap.to(btn, {
+        scale: 1,
+        duration: 0.3,
+        ease: "power2.out",
+      });
+    });
+  });
+
+  // 9. Floating Bag Animation
+  const cartWrapper = document.querySelector(".cart-wrapper");
+  if (cartWrapper) {
+    gsap.to(cartWrapper, {
+      y: -10,
+      duration: 3,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut",
+    });
+  }
 }
+
