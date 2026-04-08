@@ -313,9 +313,9 @@ function finalizeOrder(nombre, direccion) {
         
         // Limpiar modal de exito
         setTimeout(() => {
-          successOverlay.classList.remove('show');
+          // successOverlay.classList.remove('show');
           window.location.href = 'index.html?checkout=ok';
-        }, 1200);
+        }, 3000);
       }, 2000);
     } else {
       window.open(url, '_blank');
@@ -331,6 +331,13 @@ function finalizeOrder(nombre, direccion) {
     setButtonLoading(checkoutSubmitBtn, false, 'ENVIANDO...');
   }
 }
+
+window.closeSuccessModal = function() {
+  const successOverlay = document.getElementById('successOverlay');
+  if (successOverlay) {
+    successOverlay.classList.remove('show');
+  }
+};
 
 function updateCartUI() {
   const totalItems = cart.reduce((acc, item) => acc + item.qty, 0);
@@ -500,7 +507,7 @@ async function initStorePage() {
   document.getElementById('cartOverlay')?.addEventListener('click', closeCart);
   document.getElementById('checkoutOpenBtn')?.addEventListener('click', () => {
     if (!cart.length) {
-      alert('Tu carrito esta vacio.');
+      showToast('Tu carrito esta vacio.');
       return;
     }
     openCheckoutModal();
@@ -510,7 +517,7 @@ async function initStorePage() {
   document.getElementById('checkoutForm')?.addEventListener('submit', (event) => {
     event.preventDefault();
     if (!cart.length) {
-      alert('No hay productos en el carrito.');
+      showToast('No hay productos en el carrito.');
       closeCheckoutModal();
       return;
     }
@@ -519,7 +526,7 @@ async function initStorePage() {
     const nombre = String(formData.get('nombre') || '').trim();
     const direccion = String(formData.get('direccion') || '').trim();
     if (!nombre || !direccion) {
-      alert('Completa nombre y direccion/localidad.');
+      showToast('Completa nombre y direccion/localidad.');
       return;
     }
     finalizeOrder(nombre, direccion);
@@ -529,7 +536,14 @@ async function initStorePage() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('checkout') === 'ok') {
     window.history.replaceState({}, '', 'index.html');
-    setTimeout(() => alert('Pedido enviado por WhatsApp. Gracias por elegir Melrose.'), 150);
+    const successOverlay = document.getElementById('successOverlay');
+    if (successOverlay) {
+      successOverlay.classList.add('show');
+      const text = successOverlay.querySelector('p');
+      if (text) text.textContent = 'Gracias por elegir Melrose. Te contactaremos por WhatsApp.';
+    } else {
+      showToast('Pedido recibido. Gracias por elegir Melrose.');
+    }
   }
 }
 
@@ -623,7 +637,7 @@ async function refreshAdminTable() {
 
 window.saveRow = async function saveRow(id) {
   if (!supabaseClient) {
-    alert('Configura SUPABASE_URL y SUPABASE_KEY para editar desde admin.');
+    showToast('Configura Supabase para editar.');
     return;
   }
   const row = document.querySelector(`tr[data-id="${id}"]`);
@@ -633,7 +647,7 @@ window.saveRow = async function saveRow(id) {
   const { error } = await supabaseClient.from('productos').update({ precio, stock }).eq('id', id);
   if (error) {
     handleError(error, 'actualizacion de producto');
-    alert(`No se pudo guardar: ${error.message}`);
+    showToast(`No se pudo guardar: ${error.message}`);
     return;
   }
   await refreshAdminTable();
@@ -641,7 +655,7 @@ window.saveRow = async function saveRow(id) {
 
 window.deleteRow = async function deleteRow(id) {
   if (!supabaseClient) {
-    alert('Configura SUPABASE_URL y SUPABASE_KEY para eliminar desde admin.');
+    showToast('Configura Supabase para eliminar.');
     return;
   }
   const ok = confirm('Eliminar este producto?');
@@ -649,7 +663,7 @@ window.deleteRow = async function deleteRow(id) {
   const { error } = await supabaseClient.from('productos').delete().eq('id', id);
   if (error) {
     handleError(error, 'eliminacion de producto');
-    alert(`No se pudo eliminar: ${error.message}`);
+    showToast(`No se pudo eliminar: ${error.message}`);
     return;
   }
   await refreshAdminTable();
@@ -658,7 +672,7 @@ window.deleteRow = async function deleteRow(id) {
 async function handleCreateProduct(event) {
   event.preventDefault();
   if (!supabaseClient) {
-    alert('Configura SUPABASE_URL y SUPABASE_KEY para crear productos en Supabase.');
+    showToast('Configura Supabase para crear productos.');
     return;
   }
   const form = event.currentTarget;
@@ -667,22 +681,19 @@ async function handleCreateProduct(event) {
   console.log('[ADMIN][CREATE] Iniciando alta de producto...');
   const imageFile = data.get('imagen_archivo');
   if (!(imageFile instanceof File) || !imageFile.size) {
-    console.warn('[ADMIN][CREATE] Falta imagen en el formulario.');
-    alert('Selecciona una imagen antes de guardar.');
+    showToast('Selecciona una imagen.');
     return;
   }
 
   const rawPrecio = Number(data.get('precio'));
   if (!Number.isFinite(rawPrecio) || rawPrecio <= 0) {
-    console.warn('[ADMIN][CREATE] Precio invalido:', data.get('precio'));
-    alert('El precio debe ser un numero mayor a 0.');
+    showToast('Precio invalido.');
     return;
   }
 
   const rawStock = Number(data.get('stock'));
   if (!Number.isFinite(rawStock) || rawStock < 0) {
-    console.warn('[ADMIN][CREATE] Stock invalido:', data.get('stock'));
-    alert('El stock debe ser un numero mayor o igual a 0.');
+    showToast('Stock invalido.');
     return;
   }
 
@@ -708,7 +719,7 @@ async function handleCreateProduct(event) {
     uploadedImageUrl = await subirImagen(imageFile);
   } catch (error) {
     handleError(error, 'subida de imagen');
-    alert(`No se pudo subir la imagen: ${error.message}`);
+    showToast(`Error de imagen: ${error.message}`);
     setButtonLoading(submitBtn, false, 'SUBIENDO...');
     return;
   }
@@ -723,20 +734,18 @@ async function handleCreateProduct(event) {
     destacado: Boolean(data.get('destacado'))
   };
   if (!payload.nombre || !payload.precio || !payload.categoria) {
-    console.warn('[ADMIN][CREATE] Faltan campos requeridos:', payload);
-    alert('Nombre, precio y categoria son obligatorios.');
+    showToast('Completa campos obligatorios.');
     return;
   }
   console.log('[ADMIN][CREATE] Payload final a insertar:', payload);
   const { error } = await supabaseClient.from('productos').insert(payload);
   if (error) {
     handleError(error, 'alta de producto');
-    alert(`No se pudo agregar: ${error.message}`);
+    showToast(`Error al agregar: ${error.message}`);
     setButtonLoading(submitBtn, false, 'SUBIENDO...');
     return;
   }
-  console.log('[ADMIN][CREATE] Producto creado con exito.');
-  alert('Producto creado correctamente.');
+  showToast('Producto creado con exito.');
   form.reset();
   const imagePreview = document.getElementById('imagePreview');
   if (imagePreview) {
