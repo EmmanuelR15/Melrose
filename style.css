@@ -184,7 +184,6 @@ h3 {
   letter-spacing: 0.3em;
   font-size: 0.85rem;
   opacity: 0;
-  animation: heroFadeIn 1s cubic-bezier(0.4, 0, 0.2, 1) forwards 0.2s;
 }
 
 .hero h1 {
@@ -192,7 +191,6 @@ h3 {
   line-height: 0.9;
   margin: 1rem 0;
   opacity: 0;
-  animation: heroSlideUp 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards 0.4s;
 }
 
 .hero-description {
@@ -200,30 +198,13 @@ h3 {
   color: rgba(255,255,255,0.8);
   font-size: 0.95rem;
   opacity: 0;
-  animation: heroFadeIn 1s cubic-bezier(0.4, 0, 0.2, 1) forwards 0.6s;
 }
 
 .hero .btn-primary {
   margin-top: 2rem;
   opacity: 0;
-  animation: heroFadeIn 1s cubic-bezier(0.4, 0, 0.2, 1) forwards 0.8s;
 }
 
-@keyframes heroFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes heroSlideUp {
-  from { 
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  to { 
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 .categories-wrap {
   border-top: 1px solid var(--borde);
@@ -283,11 +264,11 @@ h3 {
 }
 
 .product-card {
-  background: var(--negro-suave);
+  background: #0a0a0a;
   border: 1px solid var(--borde);
-  transition: all 0.35s ease;
+  transition: border-color 0.4s ease;
+  overflow: hidden;
   opacity: 0;
-  transform: translateY(18px);
 }
 
 .product-card.is-visible {

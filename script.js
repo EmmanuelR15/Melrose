@@ -25,6 +25,9 @@ const fallbackProducts = [
 ];
 
 let supabaseClient = null;
+if (typeof gsap !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+}
 if (
   window.supabase &&
   SUPABASE_URL &&
@@ -167,21 +170,75 @@ function showProductSkeleton(count = 6) {
 }
 
 function initProductReveal() {
-  const cards = Array.from(document.querySelectorAll('.product-card'));
+  const cards = gsap.utils.toArray('.product-card');
   if (!cards.length) return;
-  if (!('IntersectionObserver' in window)) {
-    cards.forEach((card) => card.classList.add('is-visible'));
-    return;
-  }
-  const observer = new IntersectionObserver((entries, obs) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('is-visible');
-        obs.unobserve(entry.target);
+
+  gsap.to(cards, {
+    delay: 0.1,
+    opacity: 1,
+    y: 0,
+    duration: 0.8,
+    stagger: 0.1,
+    ease: "power2.out",
+    scrollTrigger: {
+      trigger: ".products-grid",
+      start: "top 85%",
+      toggleActions: "play none none none"
+    }
+  });
+
+  // Micro-interacciones Hover Orgánico
+  cards.forEach(card => {
+    card.addEventListener('mouseenter', () => {
+      gsap.to(card, { scale: 1.05, duration: 0.4, ease: "power2.out" });
+    });
+    card.addEventListener('mouseleave', () => {
+      gsap.to(card, { scale: 1, duration: 0.4, ease: "power2.inOut" });
+    });
+  });
+}
+
+function initGSAPAnimations() {
+  if (typeof gsap === 'undefined') return;
+
+  const mm = gsap.matchMedia();
+
+  // Desktop Only: Parallax y Navbar Logo
+  mm.add("(min-width: 1025px)", () => {
+    // Parallax Hero Background
+    gsap.to('.hero', {
+      backgroundPositionY: '30%',
+      ease: "none",
+      scrollTrigger: {
+        trigger: ".hero",
+        start: "top top",
+        end: "bottom top",
+        scrub: true
       }
     });
-  }, { threshold: 0.12 });
-  cards.forEach((card) => observer.observe(card));
+
+    // Navbar Logo Scroll Transition
+    gsap.to('.logo', {
+      scale: 0.85,
+      y: -2,
+      duration: 0.3,
+      scrollTrigger: {
+        trigger: "body",
+        start: "50px top",
+        toggleActions: "play none none reverse"
+      }
+    });
+  });
+
+  // Hero Entry Sequence
+  const heroTL = gsap.timeline({ delay: 0.2 });
+  heroTL.to('.hero-kicker, .hero h1, .hero-description, .hero .btn-primary', {
+    opacity: 1,
+    y: 0,
+    duration: 1,
+    stagger: 0.2,
+    ease: "power3.out"
+  });
 }
 
 function getValidTalles(product) {
@@ -231,6 +288,10 @@ function renderProducts(categoria = 'TODO') {
     </article>
   `;
   }).join('');
+
+  if (typeof ScrollTrigger !== 'undefined') {
+    ScrollTrigger.refresh();
+  }
 }
 
 function openCart() {
@@ -887,10 +948,20 @@ function smoothScrollTo(selector) {
   const elementPosition = elementRect - bodyRect;
   const offsetPosition = elementPosition - offset;
 
-  window.scrollTo({
-    top: offsetPosition,
-    behavior: 'smooth'
-  });
+    gsap.to(window, {
+      duration: 1.25,
+      scrollTo: { y: offsetPosition, autoKill: true },
+      ease: "power2.inOut",
+      onComplete: () => {
+        // Opción: limpiar hash si existiera, aunque evitamos que ocurra en el listener
+      }
+    });
+  } else {
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth'
+    });
+  }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -898,6 +969,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (document.getElementById('productsGrid')) {
     initSecretAdminAccess();
     await initStorePage();
+    initGSAPAnimations();
+    initProductReveal();
   }
   if (document.getElementById('adminPanel')) {
     await initAdminPage();
