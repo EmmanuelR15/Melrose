@@ -9,6 +9,15 @@ let products = [];
 let errorMessage = null;
 
 try {
+  console.log(
+    'Supabase URL:',
+    import.meta.env.PUBLIC_SUPABASE_URL ? 'Detectada' : 'No detectada',
+  );
+
+  if (!supabase) {
+    throw new Error('Supabase client not initialized due to missing env vars.');
+  }
+
   const { data, error } = await supabase
     .from('productos')
     .select('*')
@@ -17,12 +26,14 @@ try {
   if (error) {
     console.error('[SSR ERROR]', error);
     errorMessage = 'No se pudieron cargar los productos en este momento.';
+    products = [];
   } else {
     products = data ?? [];
   }
 } catch (err) {
   console.error('[SSR FETCH FAILED]', err);
   errorMessage = 'Error al cargar los productos del catálogo.';
+  products = [];
 }
 ---
 
