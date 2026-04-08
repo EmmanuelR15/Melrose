@@ -6,33 +6,17 @@ import ProductCard from '../components/ProductCard.astro';
 import { supabase } from '../lib/supabase';
 
 let products = [];
-let errorMessage = null;
 
 try {
-  console.log(
-    'Supabase URL:',
-    import.meta.env.PUBLIC_SUPABASE_URL ? 'Detectada' : 'No detectada',
-  );
+  if (supabase) {
+    const { data, error } = await supabase
+      .from('productos')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-  if (!supabase) {
-    throw new Error('Supabase client not initialized due to missing env vars.');
+    products = error ? [] : data ?? [];
   }
-
-  const { data, error } = await supabase
-    .from('productos')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error('[SSR ERROR]', error);
-    errorMessage = 'No se pudieron cargar los productos en este momento.';
-    products = [];
-  } else {
-    products = data ?? [];
-  }
-} catch (err) {
-  console.error('[SSR FETCH FAILED]', err);
-  errorMessage = 'Error al cargar los productos del catálogo.';
+} catch {
   products = [];
 }
 ---
@@ -42,10 +26,6 @@ try {
 		<Hero />
     
     <Manifesto />
-    
-    {errorMessage ? (
-      <p class="error-message">{errorMessage}</p>
-    ) : null}
 
     <section id="productos" class="section-gallery">
       <div class="section-title section-narrow">
@@ -54,9 +34,13 @@ try {
       </div>
 
       <div class="products-grid">
-        {products && products.map((product) => (
-          <ProductCard product={product} />
-        ))}
+        {products.length > 0 ? (
+          products.map((product) => (
+            <ProductCard product={product} />
+          ))
+        ) : (
+          <p class="empty-message">El catálogo está en mantenimiento. Volvé a cargar la página en unos minutos.</p>
+        )}
       </div>
     </section>
 	</main>
@@ -90,6 +74,15 @@ try {
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 4rem 2rem;
     padding: 0 5%;
+  }
+
+  .empty-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-size: 1rem;
+    color: var(--texto);
+    opacity: 0.8;
+    margin: 4rem 0;
   }
 
   /* Editorial Layout: Algunos elementos ocupan ms espacio */
