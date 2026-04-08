@@ -262,19 +262,23 @@ function closeCheckoutModal() {
 function buildWhatsappMessage(nombre, direccion) {
   const lineItems = cart.map((item) => {
     const talle = item.talle || 'UNICO';
-    return `- ${item.nombre} x${item.qty} | Talle: ${talle} | ${formatter.format(Number(item.precio || 0))}`;
-  }).join('\n');
+    return `${item.qty}x *${item.nombre}* \n   Talle: \`${talle}\` \n   ${formatter.format(Number(item.precio || 0))}`;
+  }).join('\n\n');
+  
   const total = cart.reduce((acc, item) => acc + Number(item.precio || 0) * item.qty, 0);
+  
   return [
-    '*PEDIDO NUEVO - MELROSE* 🛍️',
-    '',
-    `Cliente: ${nombre}`,
-    `Entrega: ${direccion}`,
-    '',
-    '*Detalle:*',
+    '*MELROSE — NUEVA ORDEN* 🛍️',
+    '---',
+    `👤 *CLIENTE:* ${nombre}`,
+    `📍 *ENTREGA:* ${direccion}`,
+    '---',
+    '*DETALLE DEL PEDIDO:*',
     lineItems,
+    '---',
+    `*TOTAL: ${formatter.format(total)}*`,
     '',
-    `*TOTAL: ${formatter.format(total)}*`
+    '*¿Cómo te gustaría proceder con el pago?*'
   ].join('\n');
 }
 
