@@ -205,8 +205,9 @@ function renderProducts(categoria = 'TODO') {
 
   grid.innerHTML = filtered.map((item) => {
     const talles = getValidTalles(item);
+    const isOutOfStock = Number(item.stock || 0) <= 0;
     return `
-    <article class="product-card" data-product-id="${safeText(item.id)}">
+    <article class="product-card ${isOutOfStock ? 'out-of-stock' : ''}" data-product-id="${safeText(item.id)}">
       <div class="product-image-wrap">
         <img src="${safeText(item.imagen_url || placeholderImage)}" alt="${safeText(item.nombre)}" loading="lazy" onerror="this.onerror=null;this.src='${brokenImagePlaceholder}'">
       </div>
@@ -220,7 +221,12 @@ function renderProducts(categoria = 'TODO') {
             ${talles.map((talle) => `<option value="${safeText(talle)}">${safeText(talle)}</option>`).join('')}
           </select>` : ''}
         </div>
-        <button class="add-btn" onclick="addToCart('${safeText(item.id)}', this)" aria-label="Agregar producto">+</button>
+        <button class="add-btn" 
+          onclick="addToCart('${safeText(item.id)}', this)" 
+          ${isOutOfStock ? 'disabled' : ''} 
+          aria-label="Agregar producto">
+          ${isOutOfStock ? 'SIN STOCK' : '+'}
+        </button>
       </div>
     </article>
   `;
@@ -278,14 +284,44 @@ function finalizeOrder(nombre, direccion) {
   const message = buildWhatsappMessage(nombre, direccion);
   const url = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(message)}`;
   try {
-    window.open(url, '_blank');
-    cart = [];
-    localStorage.removeItem('melrose_cart');
-    updateCartUI();
-    closeCheckoutModal();
-    closeCart();
-    alert('Gracias por tu compra. Te redirigimos al inicio.');
-    window.location.href = 'index.html?checkout=ok';
+    // Victoria Feedback
+    const successOverlay = document.getElementById('successOverlay');
+    if (successOverlay) {
+      successOverlay.classList.add('show');
+      
+      // Confetti Minimalista
+      if (window.confetti) {
+        window.confetti({
+          particleCount: 150,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#ffffff', '#000000', '#888888']
+        });
+      }
+
+      setTimeout(() => {
+        window.open(url, '_blank');
+        cart = [];
+        localStorage.removeItem('melrose_cart');
+        updateCartUI();
+        closeCheckoutModal();
+        closeCart();
+        
+        // Limpiar modal de exito
+        setTimeout(() => {
+          successOverlay.classList.remove('show');
+          window.location.href = 'index.html?checkout=ok';
+        }, 1200);
+      }, 2000);
+    } else {
+      window.open(url, '_blank');
+      cart = [];
+      localStorage.removeItem('melrose_cart');
+      updateCartUI();
+      closeCheckoutModal();
+      closeCart();
+      window.location.href = 'index.html?checkout=ok';
+    }
   } catch (error) {
     handleError(error, 'envio por WhatsApp');
     setButtonLoading(checkoutSubmitBtn, false, 'ENVIANDO...');
@@ -374,8 +410,16 @@ window.addToCart = function addToCart(id, triggerButton) {
   }
   const existing = cart.find((item) => String(item.id) === String(id));
   if (existing) {
+    if (existing.qty + 1 > Number(found.stock || 0)) {
+      showToast('Limite de stock alcanzado.');
+      return;
+    }
     existing.qty += 1;
   } else {
+    if (1 > Number(found.stock || 0)) {
+      showToast('Producto sin stock.');
+      return;
+    }
     cart.push({
       id: found.id,
       nombre: found.nombre,
@@ -396,7 +440,13 @@ window.addToCart = function addToCart(id, triggerButton) {
 window.changeQty = function changeQty(id, delta) {
   cart = cart.map((item) => {
     if (String(item.id) === String(id)) {
-      return { ...item, qty: item.qty + delta };
+      const found = allProducts.find(p => String(p.id) === String(id));
+      const newQty = item.qty + delta;
+      if (delta > 0 && found && newQty > Number(found.stock || 0)) {
+        showToast('Limite de stock alcanzado.');
+        return item;
+      }
+      return { ...item, qty: newQty };
     }
     return item;
   }).filter((item) => item.qty > 0);
@@ -419,6 +469,16 @@ async function initStorePage() {
   }
 
   await cargarProductos('TODO');
+  
+  // Limpiador Fantasma: Borrar productos del carrito que ya no existen en el catalogo
+  const productIds = new Set(allProducts.map(p => String(p.id)));
+  const originalCartLength = cart.length;
+  cart = cart.filter(item => productIds.has(item.id));
+  if (cart.length !== originalCartLength) {
+    saveCart();
+    console.log('[CART] Se eliminaron productos inexistentes del carrito.');
+  }
+
   updateCartUI();
 
   document.querySelectorAll('.category-btn').forEach((btn) => {
@@ -427,6 +487,7 @@ async function initStorePage() {
       document.querySelectorAll('.category-btn').forEach((x) => x.classList.remove('active'));
       target.classList.add('active');
       await cargarProductos(target.dataset.cat || 'TODO');
+      window.scrollTo({ top: document.getElementById('productos').offsetTop - 70, behavior: 'smooth' });
     });
   });
 
@@ -621,10 +682,13 @@ async function handleCreateProduct(event) {
     return;
   }
 
-  const tallesArray = String(data.get('talles') || '')
-    .split(',')
-    .map((x) => x.trim().toUpperCase())
-    .filter(Boolean);
+  const tallesRaw = data.get('talles');
+  let tallesArray = [];
+  try {
+    tallesArray = JSON.parse(tallesRaw || '[]');
+  } catch (e) {
+    tallesArray = [];
+  }
 
   console.log('[ADMIN][CREATE] Datos parseados previos al upload:', {
     nombre: String(data.get('nombre') || '').trim(),
@@ -735,7 +799,59 @@ async function initAdminPage() {
   });
 
   productForm?.addEventListener('submit', handleCreateProduct);
+  initTagsSystem();
   await applyAdminState();
+}
+
+function initTagsSystem() {
+  const container = document.getElementById('tagsContainer');
+  const input = document.getElementById('tagInput');
+  const btnAdd = document.getElementById('btnAddTag');
+  const hidden = document.getElementById('tallesHidden');
+  if (!container || !input || !hidden) return;
+
+  let tags = [];
+
+  const updateHidden = () => {
+    hidden.value = JSON.stringify(tags);
+  };
+
+  const renderTags = () => {
+    container.innerHTML = tags.map((t, index) => `
+      <span class="tag">
+        ${safeText(t)}
+        <span class="remove-tag" onclick="removeTag(${index})">X</span>
+      </span>
+    `).join('');
+    updateHidden();
+  };
+
+  window.removeTag = (index) => {
+    tags.splice(index, 1);
+    renderTags();
+  };
+
+  const addCurrentTag = () => {
+    const val = input.value.trim().toUpperCase();
+    if (val && !tags.includes(val)) {
+      tags.push(val);
+      renderTags();
+    }
+    input.value = '';
+    input.focus();
+  };
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addCurrentTag();
+    }
+  });
+
+  btnAdd?.addEventListener('click', (e) => {
+    e.preventDefault();
+    addCurrentTag();
+  });
 }
 
 document.addEventListener('DOMContentLoaded', async () => {

@@ -37,14 +37,30 @@
       <form id="productForm" class="admin-form-grid">
         <input name="nombre" placeholder="Nombre" required>
         <input name="precio" type="number" min="1" step="1" placeholder="Precio" required>
-        <input name="categoria" placeholder="Categoria (REMERAS/CAMPERAS/...)" required>
+        <select name="categoria" required>
+          <option value="" disabled selected>Seleccionar Categoria</option>
+          <option value="REMERAS">REMERAS</option>
+          <option value="DENIM">DENIM</option>
+          <option value="PANTALONES">PANTALONES</option>
+          <option value="BUZOS">BUZOS</option>
+          <option value="CAMPERAS">CAMPERAS</option>
+          <option value="ACCESORIOS">ACCESORIOS</option>
+          <option value="BASICOS">BASICOS</option>
+        </select>
         <input name="stock" type="number" min="0" step="1" placeholder="Stock" required>
         <input id="imagenArchivo" name="imagen_archivo" type="file" accept="image/*" required>
         <div class="image-preview-wrap">
           <img id="imagePreview" class="image-preview" alt="Preview de imagen seleccionada">
         </div>
         <input name="descripcion" placeholder="Descripcion">
-        <input name="talles" placeholder="Talles separados por coma (S,M,L)">
+        <div class="tags-system" id="tallesTagsSystem">
+          <div class="tags-container" id="tagsContainer"></div>
+          <div class="tag-input-wrap">
+            <input type="text" id="tagInput" placeholder="Añade talle">
+            <button type="button" id="btnAddTag" class="btn-add-tag">+</button>
+          </div>
+          <input type="hidden" name="talles" id="tallesHidden">
+        </div>
         <label class="check-wrap"><input name="destacado" type="checkbox"> Destacado</label>
         <button type="submit" class="btn-primary">AGREGAR PRODUCTO</button>
       </form>
