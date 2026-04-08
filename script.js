@@ -2,13 +2,19 @@ const SUPABASE_URL = 'https://nqnykxwfpuelphtxxwtn.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_BG5FRtP_2WJYsMyKbA9u7A_L4aLjq3l';
 const ADMIN_PASSWORD = 'melrose2024';
 const WHATSAPP_PHONE = '5493624645328';
+const ADMIN_PATH = 'atelier-7f3k-admin.html';
 
 const formatter = new Intl.NumberFormat('es-AR', {
   style: 'currency',
-  currency: 'ARS'
+  currency: 'ARS',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0
 });
 
 const placeholderImage = 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=900&q=80';
+const brokenImagePlaceholder = `data:image/svg+xml;utf8,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200"><rect width="900" height="1200" fill="#1a1a1a"/><rect x="40" y="40" width="820" height="1120" fill="none" stroke="#2a2a2a" stroke-width="2"/><text x="50%" y="49%" text-anchor="middle" fill="#6f6f6f" font-family="Inter, Arial, sans-serif" font-size="34" letter-spacing="8">MELROSE</text><text x="50%" y="54%" text-anchor="middle" fill="#5a5a5a" font-family="Inter, Arial, sans-serif" font-size="15" letter-spacing="4">IMAGE UNAVAILABLE</text></svg>'
+)}`;
 const fallbackProducts = [
   { id: 'f1', nombre: 'REMERA ESSENTIAL BLACK', descripcion: 'Algodon premium', precio: 22990, categoria: 'REMERAS', talles: ['S', 'M', 'L'], imagen_url: 'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=900&q=80', destacado: false, stock: 18 },
   { id: 'f2', nombre: 'CAMPERA BOMBER NOIR', descripcion: 'Tela tecnica', precio: 79990, categoria: 'CAMPERAS', talles: ['M', 'L', 'XL'], imagen_url: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=900&q=80', destacado: true, stock: 7 },
@@ -31,6 +37,7 @@ if (
 
 let allProducts = [];
 let cart = loadCart();
+let latestProductsRequest = 0;
 
 function loadCart() {
   try {
@@ -54,6 +61,63 @@ function safeText(value) {
   }[m]));
 }
 
+function ensureToastWrap() {
+  let wrap = document.getElementById('toastWrap');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.id = 'toastWrap';
+    wrap.className = 'toast-wrap';
+    document.body.appendChild(wrap);
+  }
+  return wrap;
+}
+
+function showToast(message) {
+  const wrap = ensureToastWrap();
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  wrap.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 220);
+  }, 3200);
+}
+
+function handleError(error, contexto) {
+  console.error(`[ERROR][${contexto}]`, error);
+  showToast(`Error en ${contexto}. Revisa conexion o permisos.`);
+}
+
+function setButtonLoading(button, isLoading, loadingText) {
+  if (!button) return;
+  if (isLoading) {
+    button.dataset.originalText = button.textContent;
+    button.textContent = loadingText;
+    button.disabled = true;
+    button.classList.add('btn-loading');
+    return;
+  }
+  button.textContent = button.dataset.originalText || button.textContent;
+  button.disabled = false;
+  button.classList.remove('btn-loading');
+}
+
+function initSecretAdminAccess() {
+  const pressed = new Set();
+  window.addEventListener('keydown', (event) => {
+    pressed.add(event.key.toLowerCase());
+    if (pressed.has('a') && pressed.has('l')) {
+      window.location.href = ADMIN_PATH;
+    }
+  });
+  window.addEventListener('keyup', (event) => {
+    pressed.delete(event.key.toLowerCase());
+  });
+  window.addEventListener('blur', () => pressed.clear());
+}
+
 async function getProductsFromSource() {
   if (!supabaseClient) {
     return fallbackProducts.slice();
@@ -69,13 +133,62 @@ async function getProductsFromSource() {
 }
 
 async function cargarProductos(categoria = 'TODO') {
+  const requestId = ++latestProductsRequest;
+  showProductSkeleton(6);
   try {
     allProducts = await getProductsFromSource();
   } catch (error) {
-    console.error('No se pudieron cargar productos:', error);
+    handleError(error, 'carga de productos');
     allProducts = fallbackProducts.slice();
+  } finally {
+    if (requestId !== latestProductsRequest) {
+      return;
+    }
+    renderProducts(categoria);
+    initProductReveal();
   }
-  renderProducts(categoria);
+}
+
+function showProductSkeleton(count = 6) {
+  const grid = document.getElementById('productsGrid');
+  if (!grid) return;
+  grid.innerHTML = Array.from({ length: count }).map(() => `
+    <article class="product-card skeleton-card is-visible">
+      <div class="product-image-wrap skeleton-block"></div>
+      <div class="product-content">
+        <div class="skeleton-lines">
+          <span class="skeleton-line w-80"></span>
+          <span class="skeleton-line w-40"></span>
+        </div>
+        <span class="skeleton-add"></span>
+      </div>
+    </article>
+  `).join('');
+}
+
+function initProductReveal() {
+  const cards = Array.from(document.querySelectorAll('.product-card'));
+  if (!cards.length) return;
+  if (!('IntersectionObserver' in window)) {
+    cards.forEach((card) => card.classList.add('is-visible'));
+    return;
+  }
+  const observer = new IntersectionObserver((entries, obs) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        obs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  cards.forEach((card) => observer.observe(card));
+}
+
+function getValidTalles(product) {
+  if (!Array.isArray(product?.talles)) return [];
+  return product.talles
+    .map((talle) => String(talle || '').trim().toUpperCase())
+    .filter(Boolean);
 }
 
 function renderProducts(categoria = 'TODO') {
@@ -90,20 +203,28 @@ function renderProducts(categoria = 'TODO') {
     return;
   }
 
-  grid.innerHTML = filtered.map((item) => `
-    <article class="product-card">
+  grid.innerHTML = filtered.map((item) => {
+    const talles = getValidTalles(item);
+    return `
+    <article class="product-card" data-product-id="${safeText(item.id)}">
       <div class="product-image-wrap">
-        <img src="${safeText(item.imagen_url || placeholderImage)}" alt="${safeText(item.nombre)}" loading="lazy">
+        <img src="${safeText(item.imagen_url || placeholderImage)}" alt="${safeText(item.nombre)}" loading="lazy" onerror="this.onerror=null;this.src='${brokenImagePlaceholder}'">
       </div>
       <div class="product-content">
         <div>
           <h3 class="product-name">${safeText(item.nombre)}</h3>
           <p class="product-price">${formatter.format(Number(item.precio || 0))}</p>
+          ${talles.length ? `
+          <select class="size-select" data-size-select>
+            <option value="">Elegi talle</option>
+            ${talles.map((talle) => `<option value="${safeText(talle)}">${safeText(talle)}</option>`).join('')}
+          </select>` : ''}
         </div>
-        <button class="add-btn" onclick="addToCart('${safeText(item.id)}')" aria-label="Agregar producto">+</button>
+        <button class="add-btn" onclick="addToCart('${safeText(item.id)}', this)" aria-label="Agregar producto">+</button>
       </div>
     </article>
-  `).join('');
+  `;
+  }).join('');
 }
 
 function openCart() {
@@ -152,17 +273,23 @@ function buildWhatsappMessage(nombre, direccion) {
 }
 
 function finalizeOrder(nombre, direccion) {
+  const checkoutSubmitBtn = document.querySelector('#checkoutForm button[type="submit"]');
+  setButtonLoading(checkoutSubmitBtn, true, 'ENVIANDO...');
   const message = buildWhatsappMessage(nombre, direccion);
   const url = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(message)}`;
-  window.open(url, '_blank');
-
-  cart = [];
-  localStorage.removeItem('melrose_cart');
-  updateCartUI();
-  closeCheckoutModal();
-  closeCart();
-  alert('Gracias por tu compra. Te redirigimos al inicio.');
-  window.location.href = 'index.html?checkout=ok';
+  try {
+    window.open(url, '_blank');
+    cart = [];
+    localStorage.removeItem('melrose_cart');
+    updateCartUI();
+    closeCheckoutModal();
+    closeCart();
+    alert('Gracias por tu compra. Te redirigimos al inicio.');
+    window.location.href = 'index.html?checkout=ok';
+  } catch (error) {
+    handleError(error, 'envio por WhatsApp');
+    setButtonLoading(checkoutSubmitBtn, false, 'ENVIANDO...');
+  }
 }
 
 function updateCartUI() {
@@ -170,6 +297,11 @@ function updateCartUI() {
   const badge = document.getElementById('cartBadge');
   if (badge) {
     badge.textContent = String(totalItems);
+    if (totalItems > 0) {
+      badge.classList.add('is-visible');
+    } else {
+      badge.classList.remove('is-visible');
+    }
   }
 
   const itemsWrap = document.getElementById('cartItems');
@@ -177,7 +309,16 @@ function updateCartUI() {
   if (!itemsWrap || !totalText) return;
 
   if (cart.length === 0) {
-    itemsWrap.innerHTML = '<p class="empty-msg">Tu carrito esta vacio.</p>';
+    itemsWrap.innerHTML = `
+      <div class="cart-empty">
+        <p class="empty-msg">Tu bolsa de compras esta vacia.</p>
+        <button class="btn-outline" id="cartExploreBtn">EXPLORAR COLECCION</button>
+      </div>
+    `;
+    document.getElementById('cartExploreBtn')?.addEventListener('click', () => {
+      closeCart();
+      document.getElementById('productos')?.scrollIntoView({ behavior: 'smooth' });
+    });
     totalText.textContent = formatter.format(0);
     return;
   }
@@ -187,7 +328,7 @@ function updateCartUI() {
     total += Number(item.precio) * item.qty;
     return `
       <div class="cart-item">
-        <img src="${safeText(item.imagen_url || placeholderImage)}" alt="${safeText(item.nombre)}">
+        <img src="${safeText(item.imagen_url || placeholderImage)}" alt="${safeText(item.nombre)}" onerror="this.onerror=null;this.src='${brokenImagePlaceholder}'">
         <div>
           <p>${safeText(item.nombre)}</p>
           <p class="muted">Talle: ${safeText(item.talle || 'UNICO')}</p>
@@ -207,9 +348,30 @@ function updateCartUI() {
   totalText.textContent = formatter.format(total);
 }
 
-window.addToCart = function addToCart(id) {
+window.addToCart = function addToCart(id, triggerButton) {
   const found = allProducts.find((item) => String(item.id) === String(id));
   if (!found) return;
+  const card = document.querySelector(`[data-product-id="${String(id)}"]`);
+  let selectedTalle = 'UNICO';
+  const validTalles = getValidTalles(found);
+  const hasTalles = validTalles.length > 0;
+  if (hasTalles) {
+    const select = card?.querySelector('[data-size-select]');
+    selectedTalle = String(select?.value || '').trim();
+    if (!selectedTalle) {
+      if (triggerButton) {
+        const original = triggerButton.textContent;
+        triggerButton.textContent = '!';
+        triggerButton.classList.add('needs-size');
+        setTimeout(() => {
+          triggerButton.textContent = original;
+          triggerButton.classList.remove('needs-size');
+        }, 900);
+      }
+      showToast('Elegi un talle antes de agregar.');
+      return;
+    }
+  }
   const existing = cart.find((item) => String(item.id) === String(id));
   if (existing) {
     existing.qty += 1;
@@ -219,12 +381,15 @@ window.addToCart = function addToCart(id) {
       nombre: found.nombre,
       precio: Number(found.precio || 0),
       imagen_url: found.imagen_url || placeholderImage,
-      talle: Array.isArray(found.talles) && found.talles.length ? found.talles[0] : 'UNICO',
+      talle: selectedTalle,
       qty: 1
     });
   }
   saveCart();
   updateCartUI();
+  const cartTrigger = document.getElementById('cartOpenBtn');
+  cartTrigger?.classList.remove('pop');
+  requestAnimationFrame(() => cartTrigger?.classList.add('pop'));
   openCart();
 };
 
@@ -362,7 +527,7 @@ async function refreshAdminTable() {
   try {
     products = await listAdminProducts();
   } catch (error) {
-    console.error(error);
+    handleError(error, 'carga de tabla admin');
     tbody.innerHTML = '<tr><td colspan="5">Error cargando productos en admin.</td></tr>';
     return;
   }
@@ -402,6 +567,7 @@ window.saveRow = async function saveRow(id) {
   const stock = Number(row.querySelector('[data-field="stock"]')?.value || 0);
   const { error } = await supabaseClient.from('productos').update({ precio, stock }).eq('id', id);
   if (error) {
+    handleError(error, 'actualizacion de producto');
     alert(`No se pudo guardar: ${error.message}`);
     return;
   }
@@ -417,6 +583,7 @@ window.deleteRow = async function deleteRow(id) {
   if (!ok) return;
   const { error } = await supabaseClient.from('productos').delete().eq('id', id);
   if (error) {
+    handleError(error, 'eliminacion de producto');
     alert(`No se pudo eliminar: ${error.message}`);
     return;
   }
@@ -430,6 +597,7 @@ async function handleCreateProduct(event) {
     return;
   }
   const form = event.currentTarget;
+  const submitBtn = form.querySelector('button[type="submit"]');
   const data = new FormData(form);
   console.log('[ADMIN][CREATE] Iniciando alta de producto...');
   const imageFile = data.get('imagen_archivo');
@@ -467,11 +635,13 @@ async function handleCreateProduct(event) {
   });
 
   let uploadedImageUrl = '';
+  setButtonLoading(submitBtn, true, 'SUBIENDO...');
   try {
     uploadedImageUrl = await subirImagen(imageFile);
   } catch (error) {
-    console.error('[ADMIN][CREATE] Fallo etapa upload:', error);
+    handleError(error, 'subida de imagen');
     alert(`No se pudo subir la imagen: ${error.message}`);
+    setButtonLoading(submitBtn, false, 'SUBIENDO...');
     return;
   }
   const payload = {
@@ -492,8 +662,9 @@ async function handleCreateProduct(event) {
   console.log('[ADMIN][CREATE] Payload final a insertar:', payload);
   const { error } = await supabaseClient.from('productos').insert(payload);
   if (error) {
-    console.error('[ADMIN][CREATE] Fallo etapa insert DB:', error);
+    handleError(error, 'alta de producto');
     alert(`No se pudo agregar: ${error.message}`);
+    setButtonLoading(submitBtn, false, 'SUBIENDO...');
     return;
   }
   console.log('[ADMIN][CREATE] Producto creado con exito.');
@@ -504,6 +675,7 @@ async function handleCreateProduct(event) {
     imagePreview.src = '';
     imagePreview.classList.remove('visible');
   }
+  setButtonLoading(submitBtn, false, 'SUBIENDO...');
   await refreshAdminTable();
 }
 
@@ -567,7 +739,9 @@ async function initAdminPage() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  ensureToastWrap();
   if (document.getElementById('productsGrid')) {
+    initSecretAdminAccess();
     await initStorePage();
   }
   if (document.getElementById('adminPanel')) {
