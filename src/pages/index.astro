@@ -28,6 +28,12 @@ try {
     console.log('Error de Supabase:', error);
     console.log('Cantidad de productos:', data?.length ?? 0);
 
+    // Logs temporales adicionales
+    console.log('ENV URL:', import.meta.env.PUBLIC_SUPABASE_URL);
+    console.log('ENV KEY:', import.meta.env.PUBLIC_SUPABASE_ANON_KEY ? 'OK' : 'MISSING');
+    console.log('Supabase client:', supabase ? 'OK' : 'NULL');
+    console.log('Productos:', JSON.stringify(products));
+
     products = error ? [] : data ?? [];
   } else {
     console.warn('⚠️ Supabase client no está disponible');
