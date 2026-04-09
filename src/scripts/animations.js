@@ -36,58 +36,6 @@ export function initAnimations() {
     });
   }
 
-  // 3. Custom Cursor (Solo Desktop)
-  if (window.innerWidth > 1024) {
-    const cursor = document.getElementById("customCursor");
-    window.addEventListener("mousemove", (e) => {
-      gsap.to(cursor, {
-        x: e.clientX,
-        y: e.clientY,
-        duration: 0.15,
-        ease: "none",
-      });
-    });
-
-    document.querySelectorAll("a, button").forEach((el) => {
-      el.addEventListener("mouseenter", () => cursor?.classList.add("grow"));
-      el.addEventListener("mouseleave", () => cursor?.classList.remove("grow"));
-    });
-
-    // Hover suave en Product Cards
-    document.querySelectorAll(".product-card").forEach((card) => {
-      const img = card.querySelector(".product-img");
-      const nameEl = card.querySelector(".product-name");
-
-      card.addEventListener("mouseenter", () => {
-        cursor?.classList.add("grow");
-        gsap.to(img, {
-          scale: 1.2,
-          rotate: 1,
-          duration: 0.6,
-          ease: "power2.out",
-          overwrite: "auto",
-        });
-        if (nameEl) {
-          gsap.to(nameEl, {
-            duration: 0.3,
-            ease: "power2.out",
-          });
-        }
-      });
-
-      card.addEventListener("mouseleave", () => {
-        cursor?.classList.remove("grow");
-        gsap.to(img, {
-          scale: 1.05,
-          rotate: 0,
-          duration: 0.6,
-          ease: "power2.out",
-          overwrite: "auto",
-        });
-      });
-    });
-  }
-
   // 4. Hero Entrance (Split Text manual con efectos neón)
   const heroTitle = document.getElementById("heroTitle");
   const heroKicker = document.getElementById("heroKicker");

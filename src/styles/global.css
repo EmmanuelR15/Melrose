@@ -14,6 +14,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  cursor: default;
 }
 
 body {
@@ -61,33 +62,6 @@ h3 {
 
 .btn-primary:hover {
   background: var(--rojo-oscuro);
-}
-
-/* Custom Cursor Placeholder */
-.custom-cursor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 12px;
-  height: 12px;
-  background: var(--blanco);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 10000;
-  mix-blend-mode: difference;
-  transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
-  transform: translate(-50%, -50%);
-  display: none;
-}
-
-.custom-cursor.grow {
-  transform: translate(-50%, -50%) scale(2);
-}
-
-@media (min-width: 1025px) {
-  .custom-cursor {
-    display: block;
-  }
 }
 
 /* Editorial Spacing */

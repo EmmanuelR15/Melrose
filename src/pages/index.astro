@@ -11,6 +11,12 @@ import { supabase } from '../lib/supabase';
 let products = [];
 let categories = ['TODO', 'REMERAS', 'BUZOS', 'PANTALONES', 'ACCESORIOS'];
 
+// DEBUG: Verificar variables de entorno
+console.log('=== SUPABASE DEBUG ===');
+console.log('SUPABASE_URL:', import.meta.env.PUBLIC_SUPABASE_URL ? '✅ Configurado' : '❌ NO configurado');
+console.log('SUPABASE_KEY:', import.meta.env.PUBLIC_SUPABASE_KEY ? '✅ Configurado' : '❌ NO configurado');
+console.log('supabase client:', supabase ? '✅ Cliente creado' : '❌ Cliente NULL');
+
 try {
   if (supabase) {
     const { data, error } = await supabase
@@ -18,9 +24,16 @@ try {
       .select('*')
       .order('created_at', { ascending: false });
 
+    console.log('Datos recibidos:', data);
+    console.log('Error de Supabase:', error);
+    console.log('Cantidad de productos:', data?.length ?? 0);
+
     products = error ? [] : data ?? [];
+  } else {
+    console.warn('⚠️ Supabase client no está disponible');
   }
-} catch {
+} catch (err) {
+  console.error('❌ Error al conectar Supabase:', err);
   products = [];
 }
 ---
