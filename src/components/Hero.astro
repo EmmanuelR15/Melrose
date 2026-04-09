@@ -37,7 +37,15 @@ const heroImage = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?
     overflow: hidden;
     color: var(--blanco);
     background: radial-gradient(ellipse at center, #1a0000 0%, #0a0a0a 70%);
-    animation: breathe 6s ease-in-out infinite;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, #3d0000 0%, transparent 70%);
+    animation: breathe 5s ease-in-out infinite;
+    z-index: 0;
   }
 
   .hero-bg {
@@ -86,13 +94,13 @@ const heroImage = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?
   }
 
   .line {
-    font-size: clamp(3rem, 10vw, 8rem);
+    font-size: clamp(4.5rem, 18vw, 8rem);
     letter-spacing: 0.05em;
     font-weight: 900;
   }
 
   .year {
-    font-size: clamp(2rem, 7vw, 6rem);
+    font-size: clamp(3rem, 14vw, 6rem);
     color: var(--rojo);
     letter-spacing: 0.2em;
     font-weight: 900;
@@ -124,25 +132,22 @@ const heroImage = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?
   }
 
   @keyframes breathe {
-    0%   { background: radial-gradient(ellipse at center, #1a0000 0%, #0a0a0a 70%); }
-    50%  { background: radial-gradient(ellipse at 50% 60%, #2d0000 0%, #0a0a0a 65%); }
-    100% { background: radial-gradient(ellipse at center, #1a0000 0%, #0a0a0a 70%); }
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50%       { opacity: 1;   transform: scale(1.15); }
   }
 
   @media (max-width: 768px) {
+    .hero {
+      padding: 100px 1.5rem 40px;
+      gap: 1rem;
+    }
+
     .hero-content {
       padding: 0 1rem;
     }
-    
-    h1 {
-      font-size: clamp(3rem, 15vw, 8rem);
-    }
-    
+
     .hero-description {
       font-size: 0.9rem;
-    }
-  }
-</style>
     }
   }
 </style>
