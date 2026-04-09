@@ -5,7 +5,7 @@ const { data, info } = await img.ensureAlpha().raw().toBuffer({ resolveWithObjec
 
 for (let i = 0; i < data.length; i += 4) {
   const r = data[i], g = data[i+1], b = data[i+2]
-  if (r > 200 && g > 200 && b > 200) data[i+3] = 0
+  if (r > 150 && g > 150 && b > 150) data[i+3] = 0
 }
 
 await sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } })
