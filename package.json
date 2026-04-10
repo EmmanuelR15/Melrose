@@ -10,7 +10,8 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "audit:ci": "npx lighthouse http://localhost:4321 --output=json --output-path=./lighthouse-reports/lhci-local.json --chrome-flags='--headless'"
   },
   "dependencies": {
     "@astrojs/netlify": "^7.0.6",
