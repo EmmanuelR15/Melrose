@@ -49,13 +49,13 @@
 
     addToCart(button) {
       const productId = button.dataset.id;
-      const productName = button.closest('.product-card')?.querySelector('.product-name')?.textContent || 'Producto';
-      const productPrice = button.closest('.product-card')?.querySelector('.product-price')?.textContent || '0';
+      const productName = button.dataset.name || 'Producto';
+      const productPrice = parseFloat(button.dataset.price) || 0;
 
       const item = {
         id: productId,
         name: productName,
-        price: this.parsePrice(productPrice),
+        price: productPrice,
         quantity: 1
       };
 
