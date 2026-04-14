@@ -50,37 +50,67 @@ class WishlistManager {
 
   // Toggle item in wishlist
   toggleWishlistItem(button) {
-    const productId = button.dataset.id;
-    const productData = {
-      id: button.dataset.id,
-      name: button.dataset.name,
-      price: parseFloat(button.dataset.price),
-      image: button.dataset.image,
-      category: button.dataset.category,
-      addedAt: new Date().toISOString(),
-    };
+    try {
+      // Debug: Log button data
+      console.log("Wishlist button clicked:", {
+        id: button.dataset.id,
+        name: button.dataset.name,
+        price: button.dataset.price,
+        image: button.dataset.image,
+        category: button.dataset.category,
+      });
 
-    // Check if item already exists in wishlist
-    const existingIndex = this.wishlist.findIndex(
-      (item) => item.id === productId,
-    );
+      const productId = button.dataset.id;
 
-    if (existingIndex > -1) {
-      // Remove from wishlist using splice
-      this.wishlist.splice(existingIndex, 1);
-      button.classList.remove("active");
-      this.showNotification("Eliminado de favoritos", "remove");
-    } else {
-      // Add to wishlist using push
-      this.wishlist.push(productData);
-      button.classList.add("active");
-      this.showNotification("Agregado a favoritos", "add");
+      // Validate required data
+      if (!productId) {
+        console.error("Product ID is missing from wishlist button");
+        return;
+      }
 
-      // Add neon pulse effect
-      this.addNeonEffect(button);
+      const productData = {
+        id: button.dataset.id,
+        name: button.dataset.name || "Unknown Product",
+        price: parseFloat(button.dataset.price) || 0,
+        image: button.dataset.image || "",
+        category: button.dataset.category || "uncategorized",
+        addedAt: new Date().toISOString(),
+      };
+
+      // Check if item already exists in wishlist
+      const existingIndex = this.wishlist.findIndex(
+        (item) => item.id === productId,
+      );
+
+      console.log("Wishlist operation:", {
+        productId,
+        existingIndex,
+        currentWishlist: this.wishlist.length,
+        operation: existingIndex > -1 ? "remove" : "add",
+      });
+
+      if (existingIndex > -1) {
+        // Remove from wishlist using splice
+        this.wishlist.splice(existingIndex, 1);
+        button.classList.remove("active");
+        this.showNotification("Eliminado de favoritos", "remove");
+        console.log("Item removed from wishlist:", productId);
+      } else {
+        // Add to wishlist using push
+        this.wishlist.push(productData);
+        button.classList.add("active");
+        this.showNotification("Agregado a favoritos", "add");
+        console.log("Item added to wishlist:", productId);
+
+        // Add neon pulse effect
+        this.addNeonEffect(button);
+      }
+
+      this.saveWishlist();
+    } catch (error) {
+      console.error("Error in toggleWishlistItem:", error);
+      this.showNotification("Error al actualizar favoritos", "remove");
     }
-
-    this.saveWishlist();
   }
 
   // Update all wishlist buttons based on current state

@@ -13,6 +13,64 @@ import { supabase } from '../lib/supabase';
 let products = [];
 let categories = ['TODO', 'REMERAS', 'BUZOS', 'PANTALONES', 'ACCESORIOS'];
 
+// Fallback products with unique placeholder images
+const fallbackProducts = [
+  {
+    id: 'fallback-1',
+    nombre: 'URBAN TEE CLASSIC',
+    precio: 45000,
+    imagen_url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=800&fit=crop',
+    categoria: 'REMERAS',
+    descripcion: 'Remera clásica urbana con logo bordado',
+    stock: 15
+  },
+  {
+    id: 'fallback-2',
+    nombre: 'STREET HOODIE PRO',
+    precio: 78000,
+    imagen_url: 'https://images.unsplash.com/photo-1556821840-3a8f3ea9f747?w=600&h=800&fit=crop',
+    categoria: 'BUZOS',
+    descripcion: 'Buzo premium con capucha y bolsillos frontales',
+    stock: 8
+  },
+  {
+    id: 'fallback-3',
+    nombre: 'CARGO PANTS BLACK',
+    precio: 95000,
+    imagen_url: 'https://images.unsplash.com/photo-1594633509878-3352ab1d8fd2?w=600&h=800&fit=crop',
+    categoria: 'PANTALONES',
+    descripcion: 'Pantalón cargo con múltiples bolsillos',
+    stock: 12
+  },
+  {
+    id: 'fallback-4',
+    nombre: 'URBAN CAP SNAPBACK',
+    precio: 35000,
+    imagen_url: 'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=600&h=600&fit=crop',
+    categoria: 'ACCESORIOS',
+    descripcion: 'Gorra snapback con logo bordado',
+    stock: 25
+  },
+  {
+    id: 'fallback-5',
+    nombre: 'GRAPHIC TEE LIMITED',
+    precio: 52000,
+    imagen_url: 'https://images.unsplash.com/photo-1516589218221-68d20a931589?w=600&h=800&fit=crop',
+    categoria: 'REMERAS',
+    descripcion: 'Remera gráfica edición limitada',
+    stock: 10
+  },
+  {
+    id: 'fallback-6',
+    nombre: 'ZIPPER HOODIE NAVY',
+    precio: 85000,
+    imagen_url: 'https://images.unsplash.com/photo-1556821840-3a8f3ea9f747?w=600&h=800&fit=crop',
+    categoria: 'BUZOS',
+    descripcion: 'Buzo con cierre frontal y capucha',
+    stock: 6
+  }
+];
+
 // DEBUG: Verificar variables de entorno
 console.log('=== SUPABASE DEBUG ===');
 console.log('SUPABASE_URL:', import.meta.env.PUBLIC_SUPABASE_URL ? '✅ Configurado' : '❌ NO configurado');
@@ -36,13 +94,14 @@ try {
     console.log('Supabase client:', supabase ? 'OK' : 'NULL');
     console.log('Productos:', JSON.stringify(products));
 
-    products = error ? [] : data ?? [];
+    products = error ? [] : data ?? fallbackProducts;
   } else {
     console.warn('⚠️ Supabase client no está disponible');
+    products = fallbackProducts;
   }
 } catch (err) {
-  console.error('❌ Error al conectar Supabase:', err);
-  products = [];
+  console.error('Error al conectar Supabase:', err);
+  products = fallbackProducts;
 }
 ---
 
@@ -210,6 +269,27 @@ try {
 		const filterButtons = document.querySelectorAll('.filter-btn');
 		const productCards = document.querySelectorAll('.product-card');
 		const noProductsMessage = document.querySelector('.no-products');
+
+		// Handle navbar SHOP link with category data
+		const shopLink = document.querySelector('a[data-category]');
+		if (shopLink) {
+			shopLink.addEventListener('click', (e) => {
+				e.preventDefault();
+				const category = shopLink.dataset.category;
+				
+				// Scroll to products section
+				document.getElementById('productos').scrollIntoView({ behavior: 'smooth' });
+				
+				// Apply filter after scroll
+				setTimeout(() => {
+					// Find and click corresponding filter button
+					const targetFilter = document.querySelector(`.filter-btn[data-filter="${category}"]`);
+					if (targetFilter) {
+						targetFilter.click();
+					}
+				}, 500);
+			});
+		}
 
 		function updateNoProductsMessage() {
 			if (!noProductsMessage) return;

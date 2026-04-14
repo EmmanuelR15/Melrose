@@ -33,6 +33,11 @@ const { title, description = "STW - E-commerce Editorial de Alta Gama" } = Astro
 		<script>
 			import { initAnimations } from '../scripts/animations';
 
+			// Scroll reset on page reload (F5)
+			if (performance.navigation.type === 1) {
+				window.scrollTo(0, 0);
+			}
+
 			// Inicialización inicial
 			document.addEventListener('DOMContentLoaded', () => {
 				initAnimations();
@@ -43,6 +48,9 @@ const { title, description = "STW - E-commerce Editorial de Alta Gama" } = Astro
 				initAnimations();
 			});
 		</script>
+		
+		<!-- Wishlist Management -->
+		<script src="/scripts/wishlist.js" type="module"></script>
 	</head>
 	<body>
 		<Navbar />

@@ -64,7 +64,7 @@ const lookbookItems = trends.length > 0 ? trends : fallbackTrends;
 
     <div class="lookbook-grid">
       {lookbookItems.map((item) => (
-        <div class="lookbook-item">
+        <div class="lookbook-item" data-lookbook-item>
           <img src={item.imagen_url} alt={item.titulo} loading="lazy" />
           <div class="lookbook-overlay">
             <span>{item.titulo}</span>
@@ -75,6 +75,41 @@ const lookbookItems = trends.length > 0 ? trends : fallbackTrends;
     </div>
   </div>
 </section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Lookbook stagger animation
+  const lookbookItems = document.querySelectorAll('[data-lookbook-item]');
+  
+  if (lookbookItems.length > 0) {
+    // Set initial state
+    gsap.set(lookbookItems, {
+      opacity: 0,
+      scale: 0.8,
+      y: 50
+    });
+
+    // Create stagger animation on scroll
+    gsap.to(lookbookItems, {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      duration: 0.8,
+      stagger: 0.15,
+      ease: "power3.out",
+      scrollTrigger: {
+        trigger: "#lookbook",
+        start: "top 80%",
+        end: "bottom 20%",
+        toggleActions: "play none none reverse"
+      }
+    });
+  }
+</script>
 
 <style>
   .lookbook {
