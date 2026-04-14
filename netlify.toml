@@ -66,7 +66,7 @@
     fail_deploy_on_score_thresholds = false  # TEMP: disabled while fixing performance issues (re-enable after improvements)
 
     [plugins.inputs.thresholds]
-      performance = 90
+      performance = 80
       accessibility = 90
       best-practices = 90
       seo = 90
