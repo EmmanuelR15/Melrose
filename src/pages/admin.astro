@@ -154,25 +154,44 @@ try {
           <h2>Estadísticas Rápidas</h2>
           <div class="stats-grid">
             <div class="stat-card">
-              <h3>Total Productos</h3>
-              <p class="stat-number">{products.length}</p>
+              <div class="stat-icon">📦</div>
+              <div class="stat-content">
+                <h3>Total Productos</h3>
+                <p class="stat-number">{products.length}</p>
+              </div>
             </div>
             <div class="stat-card">
-              <h3>Stock Total</h3>
-              <p class="stat-number">{products.reduce((sum, p) => sum + (p.stock || 0), 0)}</p>
+              <div class="stat-icon">💰</div>
+              <div class="stat-content">
+                <h3>Valor del Inventario</h3>
+                <p class="stat-number">
+                  ${products.reduce((sum, p) => sum + (p.precio * (p.stock || 0)), 0).toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })}
+                </p>
+              </div>
             </div>
             <div class="stat-card">
-              <h3>Precio Promedio</h3>
-              <p class="stat-number">
-                ${products.length > 0 
-                  ? Math.round(products.reduce((sum, p) => sum + p.precio, 0) / products.length).toLocaleString('es-AR')
-                  : '0'
-                }
-              </p>
+              <div class="stat-icon">⭐</div>
+              <div class="stat-content">
+                <h3>Producto Más Caro</h3>
+                <p class="stat-number">
+                  ${products.length > 0 
+                    ? Math.max(...products.map(p => p.precio)).toLocaleString('es-AR')
+                    : '0'
+                  }
+                </p>
+              </div>
             </div>
             <div class="stat-card">
-              <h3>Categorías</h3>
-              <p class="stat-number">{[...new Set(products.map(p => p.categoria))].length}</p>
+              <div class="stat-icon">📊</div>
+              <div class="stat-content">
+                <h3>Precio Promedio</h3>
+                <p class="stat-number">
+                  ${products.length > 0 
+                    ? Math.round(products.reduce((sum, p) => sum + p.precio, 0) / products.length).toLocaleString('es-AR')
+                    : '0'
+                  }
+                </p>
+              </div>
             </div>
           </div>
         </section>
@@ -545,10 +564,25 @@ try {
     border-radius: 8px;
     padding: 1.5rem;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .stat-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   .stat-card h3 {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: var(--gris);
     margin-bottom: 0.5rem;
     text-transform: uppercase;
@@ -556,10 +590,11 @@ try {
   }
 
   .stat-number {
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-family: 'Bebas Neue', sans-serif;
     color: var(--cyan);
     font-weight: 900;
+    line-height: 1;
   }
 
   @media (max-width: 768px) {
