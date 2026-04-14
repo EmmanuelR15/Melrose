@@ -93,6 +93,14 @@ try {
                   <input type="number" id="productStock" name="stock" min="0" required>
                 </div>
                 
+                <div class="form-group checkbox-group">
+                  <label for="productFeatured" class="checkbox-label">
+                    <input type="checkbox" id="productFeatured" name="destacado" value="true">
+                    <span class="checkbox-custom"></span>
+                    Marcar como Destacado
+                  </label>
+                </div>
+                
                 <div class="form-group full-width">
                   <label for="productImage">URL de Imagen</label>
                   <input type="url" id="productImage" name="imagen_url" placeholder="https://...">
@@ -114,7 +122,8 @@ try {
           <!-- Products List -->
           <div class="products-list">
             <h3>Productos Existentes</h3>
-            <div class="products-table">
+            {products.length > 0 ? (
+              <div class="products-table">
               <table>
                 <thead>
                   <tr>
@@ -123,6 +132,7 @@ try {
                     <th>Precio</th>
                     <th>Categoría</th>
                     <th>Stock</th>
+                    <th>Destacado</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
@@ -134,6 +144,9 @@ try {
                       <td>${product.precio.toLocaleString('es-AR')}</td>
                       <td>{product.categoria}</td>
                       <td>{product.stock}</td>
+                      <td class="featured-cell">
+                        {product.destacado ? '<span class="featured-star">⭐</span>' : '<span class="not-featured">-</span>'}
+                      </td>
                       <td>
                         <button class="btn-edit" data-product-id={product.id}>Editar</button>
                         <button class="btn-delete" data-product-id={product.id}>Eliminar</button>
@@ -143,6 +156,11 @@ try {
                 </tbody>
               </table>
             </div>
+            ) : (
+              <div class="empty-state">
+                <p>No hay productos cargados aún</p>
+              </div>
+            )}
           </div>
         </section>
 
@@ -245,6 +263,7 @@ try {
         document.getElementById('productStock').value = product.stock;
         document.getElementById('productImage').value = product.imagen_url || '';
         document.getElementById('productDescription').value = product.descripcion || '';
+        document.getElementById('productFeatured').checked = product.destacado || false;
         
         currentEditId = productId;
         
@@ -299,6 +318,7 @@ try {
         stock: parseInt(formData.get('stock')),
         imagen_url: formData.get('imagen_url') || '',
         descripcion: formData.get('descripcion') || '',
+        destacado: formData.get('destacado') === 'true',
         updated_at: new Date().toISOString()
       };
       
@@ -600,6 +620,93 @@ try {
     color: var(--cyan);
     font-weight: 900;
     line-height: 1;
+  }
+
+  .checkbox-group {
+    display: flex;
+    align-items: center;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--blanco);
+    gap: 0.5rem;
+  }
+
+  .checkbox-label input[type="checkbox"] {
+    display: none;
+  }
+
+  .checkbox-custom {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--borde);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .checkbox-custom::before {
+    content: '✓';
+    color: var(--blanco);
+    font-size: 14px;
+    font-weight: bold;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s ease;
+  }
+
+  .checkbox-label input[type="checkbox"]:checked + .checkbox-custom {
+    background: var(--rojo);
+    border-color: var(--rojo);
+  }
+
+  .checkbox-label input[type="checkbox"]:checked + .checkbox-custom::before {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .checkbox-label:hover .checkbox-custom {
+    border-color: var(--rojo);
+    box-shadow: 0 0 5px rgba(192, 57, 43, 0.3);
+  }
+
+  .featured-cell {
+    text-align: center;
+    font-size: 1.2rem;
+  }
+
+  .featured-star {
+    color: var(--cyan);
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  }
+
+  .not-featured {
+    color: var(--gris);
+    opacity: 0.5;
+  }
+
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 6rem 2rem;
+    color: var(--gris);
+    font-size: 1.2rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--borde);
+    border-radius: 8px;
+    background: var(--negro-suave);
   }
 
   @media (max-width: 768px) {

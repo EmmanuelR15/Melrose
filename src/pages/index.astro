@@ -155,9 +155,22 @@ try {
 							<ProductCard product={product} client:load />
 						))
 					) : (
-						<div class="no-products">
-							<p>No hay productos en esta categoría todavía.</p>
-						</div>
+						products.length === 0 ? (
+							<div class="fallback-visual">
+								<div class="fallback-content">
+									<img src="https://images.unsplash.com/photo-1558618047-3c8c5c6910e8?q=80&w=800&auto=format&fit=crop" alt="MELROSE Brand" class="fallback-image" />
+									<h3>COLECCIÓN 2026</h3>
+									<p>Próximamente disponible en nuestro catálogo oficial</p>
+									<a href="https://www.instagram.com/melrose/?hl=es-la" target="_blank" class="btn-primary">
+										SEGUIR EN INSTAGRAM
+									</a>
+								</div>
+							</div>
+						) : (
+							<div class="no-products">
+								<p>No hay productos en esta categoría todavía.</p>
+							</div>
+						)
 					)}
 				</div>
 			</div>
@@ -248,6 +261,64 @@ try {
 		display: flex;
 		align-items: center;
 		justify-content: center;
+	}
+
+	.fallback-visual {
+		grid-column: 1 / -1;
+		text-align: center;
+		padding: 8rem 2rem;
+		min-height: 500px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.fallback-content {
+		max-width: 400px;
+	}
+
+	.fallback-image {
+		width: 100%;
+		height: 250px;
+		object-fit: cover;
+		border-radius: 8px;
+		margin-bottom: 2rem;
+	}
+
+	.fallback-content h3 {
+		font-family: 'Bebas Neue', sans-serif;
+		font-size: 2rem;
+		letter-spacing: 0.1em;
+		color: var(--blanco);
+		margin-bottom: 1rem;
+	}
+
+	.fallback-content p {
+		color: var(--gris);
+		margin-bottom: 2rem;
+		line-height: 1.6;
+	}
+
+	.fallback-content .btn-primary {
+		background: var(--rojo);
+		color: var(--blanco);
+		padding: 1rem 2rem;
+		border: none;
+		border-radius: 6px;
+		font-family: 'Bebas Neue', sans-serif;
+		font-size: 1rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		text-decoration: none;
+		display: inline-block;
+	}
+
+	.fallback-content .btn-primary:hover {
+		background: var(--rojo-oscuro);
+		transform: translateY(-2px);
+		box-shadow: 0 5px 15px rgba(192, 57, 43, 0.3);
 	}
 
 	@media (max-width: 768px) {
