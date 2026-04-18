@@ -50,13 +50,13 @@
     addToCart(button) {
       const productId = button.dataset.id;
       const productName = button.dataset.name || 'Producto';
-      const productPrice = parseFloat(button.dataset.price) || 0;
+      const productImage = button.dataset.image || 'https://images.unsplash.com/photo-1552902865-b72c031ac5ea?q=80&w=200&auto=format&fit=crop';
       const stock = parseInt(button.dataset.stock) || 0;
 
       const itemExistente = this.cart.find(i => i.id === productId);
       const cantidadActual = itemExistente ? itemExistente.quantity : 0;
 
-      if (cantidadActual >= stock) {
+      if (cantidadActual >= stock && stock > 0) {
         alert(`Stock agotado. Solo hay ${stock} unidad/es disponible/s.`);
         return;
       }
@@ -66,6 +66,7 @@
         name: productName,
         price: productPrice,
         stock: stock,
+        image: productImage,
         quantity: 1
       };
 
@@ -113,13 +114,16 @@
         itemsContainer.innerHTML = this.cart.length
           ? this.cart.map(item => `
               <div class="cart-item">
-                <div class="item-info">
-                  <h4>${item.name}</h4>
-                  <p class="item-price">$ ${item.price.toLocaleString('es-AR')}</p>
-                </div>
-                <div class="item-controls">
-                  <input type="number" value="${item.quantity}" min="1" max="${item.stock}" data-id="${item.id}" class="qty-input">
-                  <button class="remove-btn" data-id="${item.id}">Eliminar</button>
+                <img src="${item.image || 'https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=200'}" alt="${item.name}" class="cart-item-img" />
+                <div class="cart-item-details">
+                  <div class="item-info">
+                    <h4>${item.name}</h4>
+                    <p class="item-price">$ ${item.price.toLocaleString('es-AR')}</p>
+                  </div>
+                  <div class="item-controls">
+                    <input type="number" value="${item.quantity}" min="1" max="${item.stock || 10}" data-id="${item.id}" class="qty-input">
+                    <button class="remove-btn" data-id="${item.id}">Retirar</button>
+                  </div>
                 </div>
               </div>
             `).join('')
@@ -166,12 +170,14 @@
         return;
       }
 
+      this.closeCart();
+
       const cartText = this.cart
-        .map(item => `${item.name} x${item.quantity} - $ ${(item.price * item.quantity).toLocaleString('es-AR')}`)
-        .join('%0A');
+        .map(item => `• ${item.name} (x${item.quantity}) - $ ${(item.price * item.quantity).toLocaleString('es-AR')}`)
+        .join('\n');
 
       const total = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      const message = `Hola, me gustaría comprar:%0A${cartText}%0ATotal: $ ${total.toLocaleString('es-AR')}`;
+      const message = `🏴 *NUEVO PEDIDO - MELROSE* 🏴\n--------------------------------\nHola! Me gustaría realizar la compra de los siguientes artículos:\n\n${cartText}\n\n💰 *TOTAL:* $ ${total.toLocaleString('es-AR')}\n--------------------------------\n¿Cómo procedemos con el pago y el envío?`;
 
       window.open(`https://wa.me/5493624645328?text=${encodeURIComponent(message)}`, '_blank');
     }
@@ -261,16 +267,33 @@
   .cart-items {
     flex: 1;
     overflow-y: auto;
-    padding: 2rem;
+    padding: 2.5rem 1.5rem;
   }
 
   .cart-item {
-    display: grid;
-    gap: 1rem;
-    margin-bottom: 2rem;
+    display: flex;
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
     padding-bottom: 2rem;
     border-bottom: 1px solid rgba(0, 212, 255, 0.1);
     animation: slideIn 0.3s ease-out;
+    align-items: flex-start;
+  }
+
+  .cart-item-img {
+    width: 70px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .cart-item-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 90px;
   }
 
   @keyframes slideIn {
@@ -284,20 +307,26 @@
     }
   }
 
+  .item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
   .item-info h4 {
-    font-size: 0.8rem;
-    letter-spacing: 0.1em;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
-    margin-bottom: 0.5rem;
     color: var(--blanco);
-    font-weight: 700;
+    font-weight: 500;
+    margin: 0;
   }
 
   .item-price {
-    font-size: 1rem;
-    color: var(--cyan);
+    font-size: 0.95rem;
+    color: var(--rojo);
     font-weight: 600;
-    text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+    margin: 0;
   }
 
   .item-controls {
@@ -323,29 +352,27 @@
     box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
   }
 
+  /* Minimalist remove button */
   .remove-btn {
     background: transparent;
-    border: 1px solid var(--magenta);
-    color: var(--magenta);
-    padding: 0.5rem 1rem;
+    border: none;
+    color: var(--gris);
+    padding: 0;
     font-size: 0.7rem;
     cursor: pointer;
     transition: all 0.3s ease;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-weight: 600;
-    box-shadow: 
-      inset 0 0 10px rgba(255, 0, 110, 0.1),
-      0 0 10px rgba(255, 0, 110, 0.2);
+    letter-spacing: 0.05em;
+    font-weight: 400;
+    text-decoration: underline;
+    box-shadow: none;
   }
 
   .remove-btn:hover {
-    background: var(--magenta);
-    color: var(--negro);
-    box-shadow: 
-      0 0 20px rgba(255, 0, 110, 0.6),
-      inset 0 0 10px rgba(255, 0, 110, 0.2);
-    transform: scale(1.05);
+    background: transparent;
+    color: var(--rojo);
+    box-shadow: none;
+    transform: none;
   }
 
   .empty-cart {
@@ -364,7 +391,8 @@
   .cart-total {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 1.5rem;
+    align-items: center;
+    margin-bottom: 2rem;
     font-size: 0.9rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -372,16 +400,36 @@
 
   .cart-total span {
     color: var(--gris);
+    font-weight: 600;
   }
 
   .cart-total strong {
-    color: var(--cyan);
-    text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
-    font-size: 1.1rem;
+    color: var(--blanco);
+    font-size: 2rem;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 0.05em;
+    text-shadow: none;
+    line-height: 1;
   }
 
+  /* Neon red hover "iguales a la Home" */
   .checkout-btn {
     width: 100%;
+    background: var(--rojo);
+    color: var(--blanco);
+    border: none;
+    padding: 15px 20px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  }
+
+  .checkout-btn:hover {
+    background: #a02e22;
+    box-shadow: 0 0 20px rgba(192, 57, 43, 0.6);
+    transform: translateY(-2px);
   }
 
   @media (max-width: 768px) {
