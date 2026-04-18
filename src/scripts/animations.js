@@ -141,6 +141,8 @@ export function initAnimations() {
       scale: 1,
       duration: 0.5,
       ease: "back.out",
+      overwrite: "auto",
+      immediateRender: false,
     }
   );
 
@@ -154,6 +156,8 @@ export function initAnimations() {
           duration: 0.3,
           ease: "power2.out",
           boxShadow: "0 0 30px rgba(0, 212, 255, 0.8)",
+          overwrite: "auto",
+          immediateRender: false,
         }
       );
     });
@@ -165,6 +169,8 @@ export function initAnimations() {
           scale: 1,
           duration: 0.3,
           ease: "power2.out",
+          overwrite: "auto",
+          immediateRender: false,
         }
       );
     });
