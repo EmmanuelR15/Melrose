@@ -133,31 +133,40 @@ export function initAnimations() {
   }
 
   // 7. Add to Cart Button Pulse
-  gsap.from(".btn-agregar", {
-    stagger: 0.1,
-    opacity: 0,
-    scale: 0.8,
-    duration: 0.5,
-    ease: "back.out",
-  });
+  gsap.fromTo(".btn-agregar", 
+    { scale: 0.8, opacity: 0 },
+    {
+      stagger: 0.1,
+      opacity: 1,
+      scale: 1,
+      duration: 0.5,
+      ease: "back.out",
+    }
+  );
 
   // 8. Hover effect en botones Add to Cart
   document.querySelectorAll(".btn-agregar").forEach((btn) => {
     btn.addEventListener("mouseenter", () => {
-      gsap.to(btn, {
-        scale: 1.08,
-        duration: 0.3,
-        ease: "power2.out",
-        boxShadow: "0 0 30px rgba(0, 212, 255, 0.8)",
-      });
+      gsap.fromTo(btn, 
+        { scale: 1 },
+        {
+          scale: 1.08,
+          duration: 0.3,
+          ease: "power2.out",
+          boxShadow: "0 0 30px rgba(0, 212, 255, 0.8)",
+        }
+      );
     });
 
     btn.addEventListener("mouseleave", () => {
-      gsap.to(btn, {
-        scale: 1,
-        duration: 0.3,
-        ease: "power2.out",
-      });
+      gsap.fromTo(btn, 
+        { scale: 1.08 },
+        {
+          scale: 1,
+          duration: 0.3,
+          ease: "power2.out",
+        }
+      );
     });
   });
 
