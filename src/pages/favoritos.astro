@@ -1,7 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { supabase } from '../lib/supabase.js';
-import WishlistManager from '../components/WishlistManager.astro';
 
 // Obtener productos del wishlist desde localStorage (client-side)
 // Esta página se renderiza principalmente del lado del cliente
@@ -35,7 +34,6 @@ import WishlistManager from '../components/WishlistManager.astro';
     </div>
   </main>
 
-  <WishlistManager />
 </Layout>
 
 <script>

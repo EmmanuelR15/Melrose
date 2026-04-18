@@ -52,6 +52,7 @@ const { title, description = "Premium Streetwear - Moda Urbana de Alta Gama" } =
 
 		<script>
 			import { initAnimations } from '../scripts/animations';
+			import { initWishlist } from '../scripts/wishlist';
 
 			// Scroll reset on page reload (F5)
 			if (performance.navigation.type === 1) {
@@ -61,11 +62,13 @@ const { title, description = "Premium Streetwear - Moda Urbana de Alta Gama" } =
 			// Inicialización inicial
 			document.addEventListener('DOMContentLoaded', () => {
 				initAnimations();
+				initWishlist();
 			});
 
 			// Reinicialización después de transiciones de página
 			document.addEventListener('astro:after-swap', () => {
 				initAnimations();
+				initWishlist();
 			});
 		</script>
 		

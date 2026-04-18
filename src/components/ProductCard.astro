@@ -110,33 +110,26 @@ const formatter = new Intl.NumberFormat('es-AR', {
     backdrop-filter: blur(10px);
   }
 
-  .wishlist-btn:hover {
-    background: rgba(192, 57, 43, 0.9);
-    transform: scale(1.1);
-    border-color: var(--magenta);
-    box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
-  }
-
   .wishlist-btn.active {
-    background: var(--magenta);
+    background: var(--rojo);
     color: var(--blanco);
-    border-color: var(--magenta);
-    box-shadow: 0 0 25px rgba(255, 0, 255, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.2);
+    border-color: var(--rojo);
+    box-shadow: 0 0 25px rgba(192, 57, 43, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.2);
     animation: neonPulse 2s ease-in-out infinite;
   }
 
   .wishlist-btn.active:hover {
-    background: var(--magenta);
+    background: var(--rojo);
     transform: scale(1.15);
-    box-shadow: 0 0 30px rgba(255, 0, 255, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 30px rgba(192, 57, 43, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.3);
   }
 
   @keyframes neonPulse {
     0%, 100% {
-      box-shadow: 0 0 25px rgba(255, 0, 255, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 25px rgba(192, 57, 43, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.2);
     }
     50% {
-      box-shadow: 0 0 35px rgba(255, 0, 255, 0.9), inset 0 0 15px rgba(255, 255, 255, 0.4);
+      box-shadow: 0 0 35px rgba(192, 57, 43, 0.9), inset 0 0 15px rgba(255, 255, 255, 0.4);
     }
   }
 
@@ -147,9 +140,9 @@ const formatter = new Intl.NumberFormat('es-AR', {
   }
 
   .wishlist-btn.active svg {
-    fill: var(--magenta);
-    stroke: var(--magenta);
-    filter: drop-shadow(0 0 8px rgba(255, 0, 255, 0.8));
+    fill: var(--rojo);
+    stroke: var(--rojo);
+    filter: drop-shadow(0 0 8px rgba(192, 57, 43, 0.8));
   }
 
   .wishlist-btn:not(.active) svg {

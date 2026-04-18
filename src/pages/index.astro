@@ -7,7 +7,6 @@ import Lookbook from '../components/Lookbook.astro';
 
 import About from '../components/About.astro';
 import ProductCard from '../components/ProductCard.astro';
-import WishlistManager from '../components/WishlistManager.astro';
 import { supabase } from '../lib/supabase';
 
 let products = [];
@@ -168,7 +167,7 @@ try {
 							</div>
 						) : (
 							<div class="no-products">
-								<p>No hay productos en esta categoría todavía.</p>
+								<p style="text-align:center;">NEW DROP COMING SOON - SUSCRIBITE AL NEWSLETTER</p>
 							</div>
 						)
 					)}
@@ -176,12 +175,15 @@ try {
 			</div>
 		</section>
 	</main>
-	<WishlistManager />
 </Layout>
 
 <style>
 	main {
 		width: 100%;
+	}
+
+	.products-section {
+		padding-top: var(--spacing-xl, 8rem);
 	}
 
 	.container {
@@ -391,7 +393,7 @@ try {
 				// Show no-products message when filtering results in empty state
 				const tempMessage = document.createElement('div');
 				tempMessage.className = 'no-products';
-				tempMessage.innerHTML = '<p>No hay productos en esta categoría todavía.</p>';
+				tempMessage.innerHTML = '<p style="text-align:center;">NEW DROP COMING SOON - SUSCRIBITE AL NEWSLETTER</p>';
 				noProductsMessage.parentNode.appendChild(tempMessage);
 				noProductsMessage.style.display = 'none';
 			} else if (visibleCards.length > 0) {

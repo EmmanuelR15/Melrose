@@ -108,6 +108,21 @@ const lookbookItems = trends.length > 0 ? trends : fallbackTrends;
         toggleActions: "play none none reverse"
       }
     });
+
+    // Parallax effect on images
+    const lookbookImgs = document.querySelectorAll('.lookbook-item img');
+    lookbookImgs.forEach(img => {
+      gsap.to(img, {
+        yPercent: 15,
+        ease: "none",
+        scrollTrigger: {
+          trigger: img.parentElement,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true,
+        }
+      });
+    });
   }
 </script>
 
@@ -166,11 +181,14 @@ const lookbookItems = trends.length > 0 ? trends : fallbackTrends;
   .lookbook-item:hover {
     transform: scale(1.02);
     border-color: var(--rojo);
+    box-shadow: 0 10px 30px rgba(192, 57, 43, 0.4);
   }
 
   .lookbook-item img {
     width: 100%;
-    height: 100%;
+    height: 120%;
+    position: relative;
+    top: -10%;
     object-fit: cover;
     transition: transform 0.6s ease;
   }
