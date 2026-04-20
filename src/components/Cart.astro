@@ -34,17 +34,20 @@
       const cartOverlay = document.getElementById('cartOverlay');
       const checkoutBtn = document.getElementById('checkoutBtn');
 
-      cartButton?.addEventListener('click', () => this.toggleCart());
-      closeCart?.addEventListener('click', () => this.closeCart());
-      cartOverlay?.addEventListener('click', () => this.closeCart());
-      checkoutBtn?.addEventListener('click', () => this.checkout());
+      if (cartButton) cartButton.onclick = () => this.toggleCart();
+      if (closeCart) closeCart.onclick = () => this.closeCart();
+      if (cartOverlay) cartOverlay.onclick = () => this.closeCart();
+      if (checkoutBtn) checkoutBtn.onclick = () => this.checkout();
 
       // Add to cart buttons
-      document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('btn-agregar') || e.target.classList.contains('add-to-cart')) {
-          this.addToCart(e.target);
-        }
-      });
+      if (!window.cartListenerAdded) {
+        document.addEventListener('click', (e) => {
+          if (e.target.classList.contains('btn-agregar') || e.target.classList.contains('add-to-cart')) {
+            this.addToCart(e.target);
+          }
+        });
+        window.cartListenerAdded = true;
+      }
     }
 
     addToCart(button) {
@@ -52,6 +55,7 @@
       const productName = button.dataset.name || 'Producto';
       const productImage = button.dataset.image || 'https://images.unsplash.com/photo-1552902865-b72c031ac5ea?q=80&w=200&auto=format&fit=crop';
       const stock = parseInt(button.dataset.stock) || 0;
+      const productPrice = parseFloat(button.dataset.price) || 0;
 
       const itemExistente = this.cart.find(i => i.id === productId);
       const cantidadActual = itemExistente ? itemExistente.quantity : 0;
@@ -185,8 +189,23 @@
     }
   }
 
-  // Initialize cart on page load
-  new CartManager();
+  // Initialize cart safely with View Transitions support
+  function initCart() {
+    if (!window.cartManagerInstance) {
+      window.cartManagerInstance = new CartManager();
+    } else {
+      window.cartManagerInstance.setupEventListeners();
+      window.cartManagerInstance.updateUI();
+    }
+  }
+
+  document.addEventListener('astro:page-load', initCart);
+  
+  if (document.readyState !== 'loading') {
+    initCart();
+  } else {
+    document.addEventListener('DOMContentLoaded', initCart);
+  }
 </script>
 
 <style>
