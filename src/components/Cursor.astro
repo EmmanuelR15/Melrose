@@ -14,8 +14,8 @@
     const cursor = document.getElementById('customCursor');
     if (!cursor) return;
 
-    // Center starting point
-    gsap.set(cursor, { xPercent: -50, yPercent: -50 });
+    // Center starting point and ensure scale is set explicitly
+    gsap.set(cursor, { xPercent: -50, yPercent: -50, scale: 1 });
 
     // QuickTo for super smooth performance
     const xTo = gsap.quickTo(cursor, "x", {duration: 0.3, ease: "power3"});

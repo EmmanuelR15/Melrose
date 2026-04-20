@@ -23,6 +23,7 @@
   // Cart Management Logic
   class CartManager {
     constructor() {
+      console.log('Contenido del carrito al inicializar:', localStorage.getItem('cart'));
       this.cart = JSON.parse(localStorage.getItem('cart') || '[]');
       this.updateUI();
       this.setupEventListeners();
@@ -42,8 +43,9 @@
       // Add to cart buttons
       if (!window.cartListenerAdded) {
         document.addEventListener('click', (e) => {
-          if (e.target.classList.contains('btn-agregar') || e.target.classList.contains('add-to-cart')) {
-            this.addToCart(e.target);
+          const btn = e.target.closest('.btn-agregar') || e.target.closest('.add-to-cart');
+          if (btn) {
+            this.addToCart(btn);
           }
         });
         window.cartListenerAdded = true;
