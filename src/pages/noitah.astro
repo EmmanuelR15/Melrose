@@ -317,6 +317,19 @@ if (isAdmin) {
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
+    // Session Sync: Si hay cookie pero no sessionStorage, sincronizar.
+    const getCookie = (name) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    };
+
+    const adminCookie = getCookie('admin_token');
+    if (adminCookie === 'melrose_admin_2024' && !sessionStorage.getItem('admin_session_token')) {
+      console.log('🔄 [DEBUG] Sincronizando sesión desde cookie a sessionStorage...');
+      sessionStorage.setItem('admin_session_token', 'melrose_admin_2024');
+    }
+
     console.log('🔍 [DEBUG] Script de administración cargado');
     console.log('🍪 [DEBUG] Cookie actual:', document.cookie);
     console.log('📂 [DEBUG] SessionStorage token:', sessionStorage.getItem('admin_session_token'));
@@ -371,8 +384,15 @@ if (isAdmin) {
       const logoutBtn = document.getElementById('logoutBtn');
       if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
+          // 1. Limpiar SessionStorage
           sessionStorage.removeItem('admin_session_token');
-          document.cookie = 'admin_token=; path=/; max-age=0; SameSite=Lax';
+          
+          // 2. Limpiar Cookie con expiración explícita
+          document.cookie = "admin_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax";
+          
+          console.log("👋 Sesión cerrada correctamente");
+          
+          // 3. Recargar para volver al estado de login
           window.location.reload();
         });
       }
