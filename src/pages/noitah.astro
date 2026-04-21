@@ -79,18 +79,31 @@ if (isAdmin) {
                   
                   <div class="form-group">
                     <label for="productCategory">Categoría *</label>
-                    <select id="productCategory" name="categoria" required>
-                      <option value="">Seleccionar...</option>
-                      <option value="REMERAS">REMERAS</option>
-                      <option value="BUZOS">BUZOS</option>
-                      <option value="PANTALONES">PANTALONES</option>
-                      <option value="ACCESORIOS">ACCESORIOS</option>
-                    </select>
+                    <input type="text" id="productCategory" name="categoria" list="categorias-list" required placeholder="Escribe o selecciona...">
+                    <datalist id="categorias-list">
+                      <option value="REMERAS"></option>
+                      <option value="BUZOS"></option>
+                      <option value="PANTALONES"></option>
+                      <option value="ACCESORIOS"></option>
+                    </datalist>
                   </div>
                   
                   <div class="form-group">
                     <label for="productStock">Stock *</label>
-                    <input type="number" id="productStock" name="stock" min="0" required>
+                    <input type="number" id="productStock" name="stock" min="0" step="1" required>
+                  </div>
+                  
+                  <div class="form-group full-width">
+                    <label>Talles Disponibles</label>
+                    <div class="talles-grid">
+                      {['S', 'M', 'L', 'XL', 'XXL', 'Talle Único'].map(talle => (
+                        <label class="checkbox-label talle-checkbox">
+                          <input type="checkbox" name="talles" value={talle}>
+                          <span class="checkbox-custom"></span>
+                          {talle}
+                        </label>
+                      ))}
+                    </div>
                   </div>
                   
                   <div class="form-group checkbox-group">
@@ -102,8 +115,13 @@ if (isAdmin) {
                   </div>
                   
                   <div class="form-group full-width">
-                    <label for="productImage">URL de Imagen</label>
-                    <input type="url" id="productImage" name="imagen_url" placeholder="https://...">
+                    <label for="productImage">Imagen del Producto</label>
+                    <div class="image-upload-container">
+                      <input type="file" id="imageUpload" accept="image/png, image/jpeg, image/webp">
+                      <input type="hidden" id="productImage" name="imagen_url">
+                      <div id="imagePreview" class="image-preview-mini"></div>
+                    </div>
+                    <small class="form-help">Las imágenes se guardan localmente. Límite de 5MB por producto.</small>
                   </div>
                   
                   <div class="form-group full-width">
@@ -144,7 +162,7 @@ if (isAdmin) {
                         <td>{product.categoria}</td>
                         <td>{product.stock}</td>
                         <td class="featured-cell">
-                          {product.destacado ? '<span class="featured-star">⭐</span>' : '<span class="not-featured">-</span>'}
+                          {product.destacado ? <span class="featured-star">⭐</span> : <span class="not-featured">-</span>}
                         </td>
                         <td>
                           <button class="btn-edit" data-product-id={product.id}>Editar</button>
@@ -178,17 +196,29 @@ if (isAdmin) {
                 <div class="stat-content">
                   <h3>Valor del Inventario</h3>
                   <p class="stat-number">
-                    ${products.reduce((sum, p) => sum + (p.precio * (p.stock || 0)), 0).toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })}
+                    {products.reduce((sum, p) => sum + (p.precio * (p.stock || 0)), 0).toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })}
                   </p>
                 </div>
               </div>
               <div class="stat-card">
-                <div class="stat-icon">⭐</div>
+                <div class="stat-icon">📈</div>
                 <div class="stat-content">
                   <h3>Producto Más Caro</h3>
                   <p class="stat-number">
                     ${products.length > 0 
                       ? Math.max(...products.map(p => p.precio)).toLocaleString('es-AR')
+                      : '0'
+                    }
+                  </p>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">📉</div>
+                <div class="stat-content">
+                  <h3>Producto Más Barato</h3>
+                  <p class="stat-number">
+                    ${products.length > 0 
+                      ? Math.min(...products.map(p => p.precio)).toLocaleString('es-AR')
                       : '0'
                     }
                   </p>
@@ -351,12 +381,52 @@ if (isAdmin) {
       const clearBtn = document.getElementById('clearForm');
       const editBtns = document.querySelectorAll('.btn-edit');
       const deleteBtns = document.querySelectorAll('.btn-delete');
+      const imageUpload = document.getElementById('imageUpload');
+      const imagePreview = document.getElementById('imagePreview');
+      const productImageInput = document.getElementById('productImage');
+      const categoriasList = document.getElementById('categorias-list');
       let currentEditId = null;
       
       function loadProducts() { return localStorage.getItem('admin_products') ? JSON.parse(localStorage.getItem('admin_products')) : []; }
       function saveProducts(products) { localStorage.setItem('admin_products', JSON.stringify(products)); }
       
-      function clearForm() { form.reset(); document.getElementById('productId').value = ''; currentEditId = null; }
+      function updateCategoriesDatalist() {
+        const products = loadProducts();
+        const categories = [...new Set(products.map(p => p.categoria).filter(Boolean))];
+        categoriasList.innerHTML = '';
+        categories.forEach(cat => {
+          const option = document.createElement('option');
+          option.value = cat;
+          categoriasList.appendChild(option);
+        });
+      }
+
+      function handleImageUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) {
+          alert('La imagen supera el límite de 5MB.');
+          e.target.value = '';
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const base64 = event.target.result;
+          productImageInput.value = base64;
+          imagePreview.innerHTML = `<img src="${base64}" alt="Preview">`;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      if (imageUpload) imageUpload.addEventListener('change', handleImageUpload);
+      
+      function clearForm() { 
+        form.reset(); 
+        document.getElementById('productId').value = ''; 
+        productImageInput.value = '';
+        imagePreview.innerHTML = '';
+        currentEditId = null; 
+      }
       
       function editProduct(productId) {
         const product = loadProducts().find(p => p.id === productId);
@@ -366,7 +436,22 @@ if (isAdmin) {
           document.getElementById('productPrice').value = product.precio;
           document.getElementById('productCategory').value = product.categoria;
           document.getElementById('productStock').value = product.stock;
-          document.getElementById('productImage').value = product.imagen_url || '';
+          
+          // Imagen
+          productImageInput.value = product.imagen_url || '';
+          if (product.imagen_url) {
+            imagePreview.innerHTML = `<img src="${product.imagen_url}" alt="Preview">`;
+          } else {
+            imagePreview.innerHTML = '';
+          }
+          
+          // Talles
+          const selectedTalles = product.talles ? (Array.isArray(product.talles) ? product.talles : product.talles.split(',')) : [];
+          const checkboxes = form.querySelectorAll('input[name="talles"]');
+          checkboxes.forEach(cb => {
+            cb.checked = selectedTalles.includes(cb.value);
+          });
+          
           document.getElementById('productDescription').value = product.descripcion || '';
           document.getElementById('productFeatured').checked = product.destacado || false;
           currentEditId = productId;
@@ -386,13 +471,18 @@ if (isAdmin) {
         form.addEventListener('submit', (e) => {
           e.preventDefault();
           const formData = new FormData(form);
+          
+          // Capturar talles seleccionados
+          const selectedTalles = Array.from(form.querySelectorAll('input[name="talles"]:checked')).map(cb => cb.value);
+          
           const product = {
             id: currentEditId || 'product_' + Date.now(),
             nombre: formData.get('nombre'),
             precio: parseFloat(formData.get('precio')),
             categoria: formData.get('categoria'),
-            stock: parseInt(formData.get('stock')),
-            imagen_url: formData.get('imagen_url') || '',
+            stock: parseInt(formData.get('stock'), 10),
+            imagen_url: document.getElementById('productImage').value,
+            talles: selectedTalles,
             descripcion: formData.get('descripcion') || '',
             destacado: formData.get('destacado') === 'true',
             updated_at: new Date().toISOString()
@@ -406,9 +496,12 @@ if (isAdmin) {
           }
           saveProducts(products);
           clearForm();
-          setTimeout(() => { window.location.reload(); }, 1000);
+          updateCategoriesDatalist();
+          setTimeout(() => { window.location.reload(); }, 500);
         });
       }
+      
+      updateCategoriesDatalist();
       
       if (clearBtn) clearBtn.addEventListener('click', clearForm);
       editBtns.forEach(btn => btn.addEventListener('click', () => editProduct(btn.dataset.productId)));
@@ -487,7 +580,13 @@ if (isAdmin) {
   .stat-icon { font-size: 2rem; margin-bottom: 0.5rem; }
   .stat-content { display: flex; flex-direction: column; align-items: center; }
   .stat-card h3 { font-size: 0.8rem; color: var(--gris); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
-  .stat-number { font-size: 1.8rem; font-family: 'Bebas Neue', sans-serif; color: var(--cyan); font-weight: 900; line-height: 1; }
+  .stat-number { font-size: 1.8rem; font-family: 'Bebas Neue', sans-serif; color: var(--cyan); font-weight: 900; line-height: 1; text-transform: uppercase; }
+  .talles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 1rem; margin-top: 0.5rem; }
+  .talle-checkbox { background: var(--negro); padding: 0.5rem; border: 1px solid var(--borde); border-radius: 4px; }
+  .form-help { color: var(--gris); font-size: 0.8rem; margin-top: 0.5rem; display: block; opacity: 0.7; }
+  .image-upload-container { display: flex; align-items: center; gap: 1.5rem; margin-top: 0.5rem; }
+  .image-preview-mini { width: 80px; height: 80px; border: 1px solid var(--borde); border-radius: 4px; background: var(--negro); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .image-preview-mini img { width: 100%; height: 100%; object-fit: cover; }
   .checkbox-group { display: flex; align-items: center; }
   .checkbox-label { display: flex; align-items: center; cursor: pointer; font-size: 0.9rem; color: var(--blanco); gap: 0.5rem; }
   .checkbox-label input[type="checkbox"] { display: none; }
