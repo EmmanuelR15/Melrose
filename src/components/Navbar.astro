@@ -9,17 +9,22 @@
     </a>
     
     <div class="nav-links" id="navLinks">
+      <!-- Capa 1: Fondo difuminado independiente -->
       <div class="nav-links-backdrop"></div>
-      <div class="nav-links-content">
-        <a href="/#productos" data-category="TODO">SHOP</a>
-        <a href="/#lookbook">LOOKBOOK</a>
-        <a href="/#nosotros">NOSOTROS</a>
-        <a href="/#ubicacion">CONTACTO</a>
-        <a href="/favoritos" class="nav-link-wishlist">
-          FAVORITOS
-          <span class="wishlist-badge" id="wishlistBadge">0</span>
-        </a>
-      </div>
+      
+      <!-- Capa 2: Navegación real (Sin filtros) -->
+      <nav class="nav-links-container">
+        <div class="nav-links-content">
+          <a href="/#productos" data-category="TODO">SHOP</a>
+          <a href="/#lookbook">LOOKBOOK</a>
+          <a href="/#nosotros">NOSOTROS</a>
+          <a href="/#ubicacion">CONTACTO</a>
+          <a href="/favoritos" class="nav-link-wishlist">
+            FAVORITOS
+            <span class="wishlist-badge" id="wishlistBadge">0</span>
+          </a>
+        </div>
+      </nav>
     </div>
 
     <div class="nav-right">
@@ -168,6 +173,11 @@
 
   .nav-links-backdrop {
     display: none;
+  }
+
+  .nav-links-container {
+    display: flex;
+    align-items: center;
   }
 
   .nav-links-content {
@@ -330,36 +340,50 @@
       height: 100vh;
       height: 100dvh;
       background: none;
+      filter: none;
       backdrop-filter: none;
       transform: translateX(100%);
       transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       z-index: 2000;
-      display: block; /* Change from flex to block to contain sibling anchors */
+      display: block;
       border-left: none;
       isolation: isolate;
     }
 
+    /* Capa de fondo con el filtro - Único elemento con blur */
     .nav-links-backdrop {
       display: block;
       position: absolute;
       inset: 0;
-      background: rgba(10, 10, 10, 0.96);
-      backdrop-filter: blur(10px); /* Slightly reduced for better performance/clarity */
+      background-color: rgba(10, 10, 10, 0.9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       z-index: 1;
       border-left: 1px solid var(--borde);
       pointer-events: none;
+      opacity: 1 !important;
+    }
+
+    /* Contenedor de contenido - Jerarquía radical de z-index */
+    .nav-links-container {
+      position: relative;
+      z-index: 50; /* Salto radical para forzar separación de renderizado */
+      display: block;
+      height: 100%;
+      opacity: 1 !important;
     }
 
     .nav-links-content {
-      position: relative;
-      z-index: 10; /* Significant jump to ensure separation */
       display: flex;
       flex-direction: column;
-      padding: 6rem 2rem 2rem;
+      padding: 6rem 1.5rem 2rem;
       width: 100%;
       height: 100%;
       gap: 0;
       align-items: flex-start;
+      background: none;
+      filter: none;
+      backdrop-filter: none;
     }
 
     .nav-links.active {
@@ -367,23 +391,22 @@
     }
 
     .nav-links-content a {
-      font-size: 1rem;
+      font-size: 1.1rem;
       letter-spacing: 0.15em;
-      padding: 1rem 0;
+      padding: 1.25rem 0;
       width: 100%;
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       transition: all 0.3s ease;
-      color: var(--blanco);
+      color: #ffffff !important; /* Blanco sólido absoluto */
       text-decoration: none;
-      /* Hardware Acceleration & Isolation */
-      transform: translateZ(0); 
-      will-change: transform;
-      -webkit-font-smoothing: antialiased;
+      font-weight: 700;
+      opacity: 1 !important;
+      /* Eliminamos translateZ para evitar sub-pixel rendering issues */
     }
 
     .nav-links-content a:hover {
       padding-left: 1rem;
-      color: var(--rojo);
+      color: var(--rojo) !important;
     }
   }
 </style>
