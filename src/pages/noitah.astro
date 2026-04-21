@@ -276,6 +276,14 @@ if (isAdmin) {
 </Layout>
 
 <script>
+  import { gsap } from 'gsap';
+  import { createClient } from '@supabase/supabase-js';
+
+  const supabase = createClient(
+    import.meta.env.PUBLIC_SUPABASE_URL,
+    import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+  );
+
   // Shared Admin Logic (Login & Panel)
   
   // Anti-intrusion for login mode (REMOVED TO PREVENT ACCIDENTAL REDIRECTS)
