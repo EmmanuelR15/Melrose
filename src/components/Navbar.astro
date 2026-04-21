@@ -38,49 +38,54 @@
 <div class="nav-overlay" id="navOverlay"></div>
 
 <script>
-  // Hamburger menu toggle
-  const hamburger = document.getElementById('hamburger');
-  const navLinks = document.getElementById('navLinks');
-  const navOverlay = document.getElementById('navOverlay');
+  // Hamburger menu toggle with Astro View Transitions support
+  document.addEventListener('astro:page-load', () => {
+    const hamburger = document.getElementById('hamburger');
+    const navLinks = document.getElementById('navLinks');
+    const navOverlay = document.getElementById('navOverlay');
 
-  function closeMenu() {
-    navLinks?.classList.remove('active');
-    hamburger?.classList.remove('active');
-    navOverlay?.classList.remove('active');
-    document.body.style.overflow = '';
-  }
+    function closeMenu() {
+      navLinks?.classList.remove('active');
+      hamburger?.classList.remove('active');
+      navOverlay?.classList.remove('active');
+      document.body.style.overflow = '';
+      console.log("🍔 Mobile Menu: Closed");
+    }
 
-  function openMenu() {
-    navLinks?.classList.add('active');
-    hamburger?.classList.add('active');
-    navOverlay?.classList.add('active');
-    document.body.style.overflow = 'hidden';
-  }
+    function openMenu() {
+      navLinks?.classList.add('active');
+      hamburger?.classList.add('active');
+      navOverlay?.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      console.log("🍔 Mobile Menu: Open");
+    }
 
-  if (hamburger && navLinks) {
-    hamburger.addEventListener('click', () => {
-      if (navLinks.classList.contains('active')) {
-        closeMenu();
-      } else {
-        openMenu();
-      }
+    if (hamburger && navLinks) {
+      hamburger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (navLinks.classList.contains('active')) {
+          closeMenu();
+        } else {
+          openMenu();
+        }
+      });
+
+      // Close menu when link clicked
+      navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => closeMenu());
+      });
+    }
+
+    // Close on overlay click
+    navOverlay?.addEventListener('click', () => closeMenu());
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeMenu();
     });
-
-    // Close menu when link clicked
-    navLinks.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => closeMenu());
-    });
-  }
-
-  // Close on overlay click
-  navOverlay?.addEventListener('click', () => closeMenu());
-
-  // Close on Escape key
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeMenu();
   });
 
-  // Escuchar actualización del carrito en el header
+  // Escuchar actualización del carrito (Global, fuera del lifecycle de transición si es necesario)
   window.addEventListener('cartUpdated', (e) => {
     const badge = document.getElementById('cartBadge');
     if (badge) {
@@ -284,7 +289,7 @@
     inset: 0;
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(4px);
-    z-index: 998;
+    z-index: 1999;
     opacity: 0;
     transition: opacity 0.3s ease;
   }
@@ -319,7 +324,7 @@
       transform: translateX(100%);
       transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       border-left: 1px solid var(--borde);
-      z-index: 999;
+      z-index: 2000; /* Increased to be above navbar (1000) */
       align-items: flex-start;
     }
 
