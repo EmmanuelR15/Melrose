@@ -367,10 +367,12 @@
     /* Contenedor de contenido - Jerarquía radical de z-index */
     .nav-links-container {
       position: relative;
-      z-index: 50; /* Salto radical para forzar separación de renderizado */
+      z-index: 9999; /* Elevado al máximo para prioridad absoluta */
       display: block;
       height: 100%;
       opacity: 1 !important;
+      filter: none !important;
+      backdrop-filter: none !important;
     }
 
     .nav-links-content {
@@ -388,19 +390,32 @@
 
     .nav-links.active {
       transform: translateX(0);
+      filter: none !important;
+      backdrop-filter: none !important;
+    }
+    
+    .nav-links.active .nav-links-backdrop {
+      filter: none !important;
+      backdrop-filter: none !important;
+      background-color: rgba(0, 0, 0, 0.98); /* Negro sólido final */
     }
 
     .nav-links-content a {
       font-size: 1.15rem;
-      letter-spacing: 0.12em; /* Sutilmente más abierto para legibilidad */
+      letter-spacing: 0.12em;
       padding: 1.25rem 0;
       width: 100%;
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       transition: all 0.3s ease;
       color: #ffffff !important;
       text-decoration: none;
-      font-weight: 600; /* Peso reducido para evitar sangrado visual */
+      font-weight: 600;
       opacity: 1 !important;
+      filter: none !important;
+      /* Refuerzo de nitidez post-transición */
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      transform: translate3d(0,0,0);
     }
 
     .nav-links-content a:hover {
