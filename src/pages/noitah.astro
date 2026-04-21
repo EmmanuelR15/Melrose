@@ -497,9 +497,17 @@ if (isAdmin) {
         currentEditId = null; 
       }
       
-      function editProduct(productId) {
-        const product = loadProducts().find(p => p.id === productId);
-        if (product) {
+      async function editProduct(productId) {
+        try {
+          const { data: product, error } = await supabase
+            .from('productos')
+            .select('*')
+            .eq('id', productId)
+            .single();
+          
+          if (error) throw error;
+          if (!product) return;
+
           document.getElementById('productId').value = product.id;
           document.getElementById('productName').value = product.nombre;
           document.getElementById('productPrice').value = product.precio;
@@ -515,7 +523,7 @@ if (isAdmin) {
           }
           
           // Talles
-          const selectedTalles = product.talles ? (Array.isArray(product.talles) ? product.talles : product.talles.split(',')) : [];
+          const selectedTalles = Array.isArray(product.talles) ? product.talles : (product.talles ? product.talles.split(',') : []);
           const checkboxes = form.querySelectorAll('input[name="talles"]');
           checkboxes.forEach(cb => {
             cb.checked = selectedTalles.includes(cb.value);
@@ -524,15 +532,40 @@ if (isAdmin) {
           document.getElementById('productDescription').value = product.descripcion || '';
           document.getElementById('productFeatured').checked = product.destacado || false;
           currentEditId = productId;
+          
           form.scrollIntoView({ behavior: 'smooth' });
+          gsap.from(form, { backgroundColor: 'rgba(0, 255, 255, 0.05)', duration: 0.5 });
+          
+        } catch (err) {
+          console.error("❌ Error al cargar producto para edición:", err);
+          alert("Error al cargar datos del producto");
         }
       }
       
-      function deleteProduct(productId) {
-        if (confirm('¿Estás seguro de eliminar este producto?')) {
-          saveProducts(loadProducts().filter(p => p.id !== productId));
+      async function deleteProduct(productId) {
+        if (!confirm('¿Estás seguro de eliminar este producto?')) return;
+        
+        try {
+          const { error } = await supabase
+            .from('productos')
+            .delete()
+            .eq('id', productId);
+          
+          if (error) throw error;
+          
           const row = document.querySelector(`tr[data-product-id="${productId}"]`);
-          if (row) row.remove();
+          if (row) {
+            gsap.to(row, { 
+              opacity: 0, 
+              x: -20, 
+              duration: 0.3, 
+              onComplete: () => row.remove() 
+            });
+          }
+          console.log(`✅ Producto ${productId} eliminado de Supabase`);
+        } catch (err) {
+          console.error("❌ Error al eliminar:", err);
+          alert("No se pudo eliminar el producto: " + err.message);
         }
       }
       
