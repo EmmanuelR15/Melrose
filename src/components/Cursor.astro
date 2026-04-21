@@ -14,36 +14,36 @@
     const cursor = document.getElementById('customCursor');
     if (!cursor) return;
 
-    // Center starting point and ensure all transform properties are explicitly initialized
+    // 1. Inicialización Explícita: Asegura que GSAP conozca el estado base antes de cualquier animación
     gsap.set(cursor, { 
       xPercent: -50, 
       yPercent: -50, 
       scale: 1,
       transformOrigin: "center center",
-      force3D: true
+      force3D: true,
+      autoAlpha: 1
     });
 
-    // QuickTo for super smooth performance
-    let xTo, yTo, scaleTo;
+    // 2. Preparación de setters (quickTo para posición, quickSetter para escala como alternativa estable)
+    let xTo, yTo, setScale;
     try {
       xTo = gsap.quickTo(cursor, "x", {duration: 0.3, ease: "power3"});
       yTo = gsap.quickTo(cursor, "y", {duration: 0.3, ease: "power3"});
-      scaleTo = gsap.quickTo(cursor, "scale", {duration: 0.3, ease: "power3.out", overwrite: true});
+      // Usamos quickSetter para escala para evitar el error de "reset" en transformaciones complejas
+      setScale = gsap.quickSetter(cursor, "scale");
     } catch (e) {
-      console.warn("GSAP quickTo initialization prevented");
+      console.warn("GSAP setters initialization prevented");
     }
 
     const handleMouseMove = (e) => {
-      // Check if cursor still exists in DOM before animating
       if (!document.getElementById('customCursor')) return;
       
-      xTo(e.clientX);
-      yTo(e.clientY);
+      // Validación de existencia antes de llamar a las acciones
+      if (typeof xTo === 'function') xTo(e.clientX);
+      if (typeof yTo === 'function') yTo(e.clientY);
       
       if (cursor && (cursor.style.opacity === "0" || cursor.style.opacity === "")) {
-        try {
-          gsap.to(cursor, {opacity: 1, duration: 0.2});
-        } catch (e) {}
+        gsap.to(cursor, {opacity: 1, duration: 0.2});
       }
     };
 
@@ -51,23 +51,23 @@
       if (!document.getElementById('customCursor')) return;
       
       const target = e.target as HTMLElement;
-      if (!target) return;
+      if (!target || !setScale) return;
       
       const isClickable = target.closest('a') || target.closest('button') || target.classList.contains('interactive');
       
-      // Nuclear Scale Fix
-      if (cursor && scaleTo && gsap.getProperty(cursor, "scale") !== undefined) {
-        try {
-          if (isClickable) {
-            scaleTo(2.5);
-            cursor.classList.add('active');
-          } else {
-            scaleTo(1);
-            cursor.classList.remove('active');
-          }
-        } catch (e) {
-          console.warn("GSAP scale animation silenced in transition");
+      // Aplicación de escala mediante quickSetter o gsap.to para suavidad sin warnings
+      try {
+        if (isClickable) {
+          // Para mantener la suavidad que tenía el quickTo pero sin los warnings de reset, 
+          // usamos un gsap.to directo que es más robusto para la escala.
+          gsap.to(cursor, { scale: 2.5, duration: 0.3, ease: "power3.out", overwrite: true });
+          cursor.classList.add('active');
+        } else {
+          gsap.to(cursor, { scale: 1, duration: 0.3, ease: "power3.out", overwrite: true });
+          cursor.classList.remove('active');
         }
+      } catch (e) {
+        console.warn("GSAP scale animation silenced");
       }
     };
 
