@@ -54,11 +54,20 @@ const formatter = new Intl.NumberFormat('es-AR', {
 });
 
 // URLs de imágenes (asumiendo campo adicional o array)
-const productImages = product?.imagenes_url 
-  ? product.imagenes_url 
+let productImages = product?.imagenes_url 
+  ? [...(Array.isArray(product.imagenes_url) ? product.imagenes_url : [])] 
   : product?.imagen_url 
     ? [product.imagen_url] 
     : [];
+
+// Inject image_back as the second image if it exists and is not already present
+if (product?.image_back && !productImages.includes(product.image_back)) {
+  if (productImages.length > 0) {
+    productImages.splice(1, 0, product.image_back);
+  } else {
+    productImages.push(product.image_back);
+  }
+}
 ---
 
 <Layout title={`${product?.nombre || 'Producto'} | MELROSE`}>
