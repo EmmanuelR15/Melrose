@@ -118,14 +118,23 @@ if (isAdmin) {
                     </label>
                   </div>
                   
-                  <div class="form-group full-width">
-                    <label for="productImage">Imagen del Producto</label>
+                  <div class="form-group">
+                    <label for="productImage">Imagen Principal *</label>
                     <div class="image-upload-container">
                       <input type="file" id="imageUpload" accept="image/png, image/jpeg, image/webp">
                       <input type="hidden" id="productImage" name="imagen_url">
                       <div id="imagePreview" class="image-preview-mini"></div>
                     </div>
-                    <small class="form-help">Las imágenes se guardan localmente. Límite de 5MB por producto.</small>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="productImageBack">Imagen Trasera (Opcional)</label>
+                    <div class="image-upload-container">
+                      <input type="file" id="imageBackUpload" accept="image/png, image/jpeg, image/webp">
+                      <input type="hidden" id="productImageBack" name="image_back">
+                      <div id="imagePreviewBack" class="image-preview-mini"></div>
+                    </div>
+                    <small class="form-help">Para mostrar el efecto hover en el catálogo.</small>
                   </div>
                   
                   <div class="form-group full-width">
@@ -442,6 +451,11 @@ if (isAdmin) {
       const imageUpload = document.getElementById('imageUpload');
       const imagePreview = document.getElementById('imagePreview');
       const productImageInput = document.getElementById('productImage');
+      
+      const imageBackUpload = document.getElementById('imageBackUpload');
+      const imagePreviewBack = document.getElementById('imagePreviewBack');
+      const productImageBackInput = document.getElementById('productImageBack');
+
       let currentEditId = null;
       
       async function fetchCategorias() {
@@ -560,11 +574,25 @@ if (isAdmin) {
 
       if (imageUpload) imageUpload.addEventListener('change', handleImageUpload);
       
+      function handleImageBackUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          imagePreviewBack.innerHTML = `<img src="${event.target.result}" alt="Preview Back">`;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      if (imageBackUpload) imageBackUpload.addEventListener('change', handleImageBackUpload);
+
       function clearForm() { 
         form.reset(); 
         document.getElementById('productId').value = ''; 
         productImageInput.value = '';
         imagePreview.innerHTML = '';
+        productImageBackInput.value = '';
+        imagePreviewBack.innerHTML = '';
         currentEditId = null; 
       }
       
@@ -585,12 +613,20 @@ if (isAdmin) {
           document.getElementById('productCategory').value = product.categoria;
           document.getElementById('productStock').value = product.stock;
           
-          // Imagen
+          // Imagen Principal
           productImageInput.value = product.imagen_url || '';
           if (product.imagen_url) {
             imagePreview.innerHTML = `<img src="${product.imagen_url}" alt="Preview">`;
           } else {
             imagePreview.innerHTML = '';
+          }
+
+          // Imagen Trasera
+          productImageBackInput.value = product.image_back || '';
+          if (product.image_back) {
+            imagePreviewBack.innerHTML = `<img src="${product.image_back}" alt="Preview Back">`;
+          } else {
+            imagePreviewBack.innerHTML = '';
           }
           
           // Talles
@@ -656,19 +692,32 @@ if (isAdmin) {
           const selectedTalles = Array.from(form.querySelectorAll('input[name="talles"]:checked')).map(cb => cb.value);
           
           let imageUrl = productImageInput.value;
+          let imageBackUrl = productImageBackInput.value;
           
-          // Debug: Capturar archivo de imagen
+          // Subir Imagen Principal
           const imageFile = imageUpload.files[0];
           if (imageFile) {
-            // Comprimir imagen antes de subir
             const compressedFile = await compressImage(imageFile, 1200, 0.82);
-            const fileName = `${Date.now()}-${crypto.randomUUID()}.jpg`;
+            const fileName = `${Date.now()}-front-${crypto.randomUUID()}.jpg`;
             const { data: uploadData, error: uploadError } = await supabase.storage
               .from('productos')
               .upload(fileName, compressedFile, { contentType: 'image/jpeg', upsert: false });
-            if (uploadError) return alert("Error al subir imagen: " + uploadError.message);
+            if (uploadError) return alert("Error al subir imagen principal: " + uploadError.message);
             const { data: urlData } = supabase.storage.from('productos').getPublicUrl(fileName);
             imageUrl = urlData.publicUrl;
+          }
+
+          // Subir Imagen Trasera
+          const imageBackFile = imageBackUpload.files[0];
+          if (imageBackFile) {
+            const compressedFileBack = await compressImage(imageBackFile, 1200, 0.82);
+            const fileNameBack = `${Date.now()}-back-${crypto.randomUUID()}.jpg`;
+            const { data: uploadDataBack, error: uploadErrorBack } = await supabase.storage
+              .from('productos')
+              .upload(fileNameBack, compressedFileBack, { contentType: 'image/jpeg', upsert: false });
+            if (uploadErrorBack) return alert("Error al subir imagen trasera: " + uploadErrorBack.message);
+            const { data: urlDataBack } = supabase.storage.from('productos').getPublicUrl(fileNameBack);
+            imageBackUrl = urlDataBack.publicUrl;
           }
           
           const product = {
@@ -677,6 +726,7 @@ if (isAdmin) {
             categoria: formData.get('categoria'),
             stock: parseInt(formData.get('stock'), 10),
             imagen_url: imageUrl,
+            image_back: imageBackUrl,
             talles: selectedTalles,
             descripcion: formData.get('descripcion') || '',
             destacado: formData.get('destacado') === 'true'
