@@ -51,7 +51,7 @@ if (isAdmin) {
           <h1>PANEL DE ADMINISTRACIÓN</h1>
           <p>Gestión de productos y inventario</p>
           <a href="/" class="back-to-site">Volver al sitio</a>
-          <button id="logoutBtn" style="margin-left: 10px; padding: 0.5rem 1.5rem; background: transparent; color: var(--blanco); border: 1px solid var(--borde); border-radius: 4px; cursor: pointer;">Cerrar Sesión</button>
+          <button id="logoutBtn" class="btn-logout">Cerrar Sesión</button>
         </div>
 
         <div class="admin-content">
@@ -79,13 +79,12 @@ if (isAdmin) {
                   
                   <div class="form-group">
                     <label for="productCategory">Categoría *</label>
-                    <input type="text" id="productCategory" name="categoria" list="categorias-list" required placeholder="Escribe o selecciona...">
-                    <datalist id="categorias-list">
-                      <option value="REMERAS"></option>
-                      <option value="BUZOS"></option>
-                      <option value="PANTALONES"></option>
-                      <option value="ACCESORIOS"></option>
-                    </datalist>
+                    <div class="category-input-wrapper">
+                      <select id="productCategory" name="categoria" required>
+                        <option value="">Cargando categorías...</option>
+                      </select>
+                      <button type="button" id="addCategoryBtn" class="btn-add-mini" title="Agregar nueva categoría">+</button>
+                    </div>
                   </div>
                   
                   <div class="form-group">
@@ -384,42 +383,67 @@ if (isAdmin) {
       const logoutBtn = document.getElementById('logoutBtn');
       if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
-          // 1. Limpiar SessionStorage
-          sessionStorage.removeItem('admin_session_token');
+          // 1. Limpiar Storage
+          localStorage.clear();
+          sessionStorage.clear();
           
-          // 2. Limpiar Cookie con expiración explícita
+          // 2. Limpiar Cookie con expiración nuclear
           document.cookie = "admin_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax";
           
-          console.log("👋 Sesión cerrada correctamente");
+          console.log("☢️ Cierre de sesión nuclear completado");
           
-          // 3. Recargar para volver al estado de login
-          window.location.reload();
+          // 3. Redirigir y reemplazar historial
+          window.location.replace('/');
         });
       }
 
       const form = document.getElementById('productForm');
       const clearBtn = document.getElementById('clearForm');
+      const addCategoryBtn = document.getElementById('addCategoryBtn');
+      const productCategorySelect = document.getElementById('productCategory');
       const editBtns = document.querySelectorAll('.btn-edit');
       const deleteBtns = document.querySelectorAll('.btn-delete');
       const imageUpload = document.getElementById('imageUpload');
       const imagePreview = document.getElementById('imagePreview');
       const productImageInput = document.getElementById('productImage');
-      const categoriasList = document.getElementById('categorias-list');
       let currentEditId = null;
       
-      function loadProducts() { return localStorage.getItem('admin_products') ? JSON.parse(localStorage.getItem('admin_products')) : []; }
-      function saveProducts(products) { localStorage.setItem('admin_products', JSON.stringify(products)); }
-      
-      function updateCategoriesDatalist() {
-        const products = loadProducts();
-        const categories = [...new Set(products.map(p => p.categoria).filter(Boolean))];
-        categoriasList.innerHTML = '';
-        categories.forEach(cat => {
-          const option = document.createElement('option');
-          option.value = cat;
-          categoriasList.appendChild(option);
-        });
+      async function fetchCategorias() {
+        if (!supabase) return;
+        try {
+          const { data, error } = await supabase.from('categorias').select('*').order('nombre');
+          if (error) throw error;
+          
+          if (productCategorySelect) {
+            productCategorySelect.innerHTML = '<option value="">Seleccionar categoría...</option>';
+            data.forEach(cat => {
+              const option = document.createElement('option');
+              option.value = cat.nombre;
+              option.textContent = cat.nombre;
+              productCategorySelect.appendChild(option);
+            });
+          }
+        } catch (err) {
+          console.error("Error fetching categories:", err);
+          if (productCategorySelect) productCategorySelect.innerHTML = '<option value="">Error al cargar</option>';
+        }
       }
+
+      async function addCategory() {
+        const nombre = prompt("Ingrese el nombre de la nueva categoría:");
+        if (!nombre || !supabase) return;
+        
+        try {
+          const { error } = await supabase.from('categorias').insert([{ nombre }]);
+          if (error) throw error;
+          alert("Categoría añadida exitosamente");
+          await fetchCategorias();
+        } catch (err) {
+          alert("Error al añadir categoría: " + err.message);
+        }
+      }
+
+      if (addCategoryBtn) addCategoryBtn.addEventListener('click', addCategory);
 
       function handleImageUpload(e) {
         const file = e.target.files[0];
@@ -431,9 +455,7 @@ if (isAdmin) {
         }
         const reader = new FileReader();
         reader.onload = (event) => {
-          const base64 = event.target.result;
-          productImageInput.value = base64;
-          imagePreview.innerHTML = `<img src="${base64}" alt="Preview">`;
+          imagePreview.innerHTML = `<img src="${event.target.result}" alt="Preview">`;
         };
         reader.readAsDataURL(file);
       }
@@ -488,40 +510,80 @@ if (isAdmin) {
       }
       
       if (form) {
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
           e.preventDefault();
           const formData = new FormData(form);
           
           // Capturar talles seleccionados
           const selectedTalles = Array.from(form.querySelectorAll('input[name="talles"]:checked')).map(cb => cb.value);
           
+          let imageUrl = productImageInput.value;
+          
+          // Debug: Capturar archivo de imagen
+          const imageFile = imageUpload.files[0];
+          
+          if (imageFile) {
+            console.log("📸 Subiendo imagen a Supabase Storage...");
+            const fileExt = imageFile.name.split('.').pop();
+            const fileName = `${Date.now()}.${fileExt}`;
+            const filePath = `uploads/${fileName}`;
+
+            const { data: uploadData, error: uploadError } = await supabase.storage
+              .from('productos')
+              .upload(filePath, imageFile);
+
+            if (uploadError) {
+              console.error("❌ Error subiendo imagen:", uploadError);
+              alert("Error al subir la imagen.");
+              return;
+            }
+
+            const { data: urlData } = supabase.storage
+              .from('productos')
+              .getPublicUrl(filePath);
+            
+            imageUrl = urlData.publicUrl;
+            console.log("✅ Imagen subida:", imageUrl);
+          }
+          
           const product = {
-            id: currentEditId || 'product_' + Date.now(),
             nombre: formData.get('nombre'),
             precio: parseFloat(formData.get('precio')),
             categoria: formData.get('categoria'),
             stock: parseInt(formData.get('stock'), 10),
-            imagen_url: document.getElementById('productImage').value,
+            imagen_url: imageUrl,
             talles: selectedTalles,
             descripcion: formData.get('descripcion') || '',
-            destacado: formData.get('destacado') === 'true',
-            updated_at: new Date().toISOString()
+            destacado: formData.get('destacado') === 'true'
           };
-          const products = loadProducts();
+          
+          // Si estamos editando, incluimos el ID para el upsert
           if (currentEditId) {
-            const index = products.findIndex(p => p.id === currentEditId);
-            if (index > -1) products[index] = product;
-          } else {
-            products.push(product);
+            product.id = currentEditId;
           }
-          saveProducts(products);
-          clearForm();
-          updateCategoriesDatalist();
-          setTimeout(() => { window.location.reload(); }, 500);
+
+          console.log("📦 Datos a enviar a Supabase:", product);
+          
+          try {
+            const { data, error } = await supabase
+              .from('productos')
+              .upsert([product])
+              .select();
+
+            if (error) throw error;
+            
+            console.log("🚀 Producto guardado en Supabase:", data);
+            alert("Producto guardado exitosamente");
+            clearForm();
+            setTimeout(() => { window.location.reload(); }, 500);
+          } catch (err) {
+            console.error("❌ Error al guardar producto:", err);
+            alert("Error al guardar en Supabase: " + err.message);
+          }
         });
       }
       
-      updateCategoriesDatalist();
+      fetchCategorias();
       
       if (clearBtn) clearBtn.addEventListener('click', clearForm);
       editBtns.forEach(btn => btn.addEventListener('click', () => editProduct(btn.dataset.productId)));
@@ -587,6 +649,12 @@ if (isAdmin) {
   .btn-primary, .btn-secondary { padding: 0.75rem 1.5rem; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
   .btn-primary { background: var(--rojo); color: var(--blanco); }
   .btn-secondary { background: transparent; color: var(--gris); border: 1px solid var(--borde); }
+  .btn-logout { margin-left: 10px; padding: 0.5rem 1.5rem; background: transparent; color: var(--rojo); border: 1px solid var(--rojo); border-radius: 4px; cursor: pointer; font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.05em; transition: all 0.3s ease; }
+  .btn-logout:hover { background: var(--rojo); color: var(--blanco); }
+  .category-input-wrapper { display: flex; gap: 0.5rem; }
+  .category-input-wrapper select { flex: 1; }
+  .btn-add-mini { width: 40px; background: var(--negro-suave); border: 1px solid var(--borde); color: var(--cyan); border-radius: 4px; cursor: pointer; font-size: 1.2rem; font-weight: bold; transition: all 0.3s ease; }
+  .btn-add-mini:hover { border-color: var(--cyan); background: rgba(0, 255, 255, 0.05); }
   .products-table { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; background: var(--negro-suave); border: 1px solid var(--borde); border-radius: 8px; overflow: hidden; }
   th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--borde); }
