@@ -344,7 +344,7 @@
       position: absolute;
       inset: 0;
       background: rgba(10, 10, 10, 0.96);
-      backdrop-filter: blur(15px);
+      backdrop-filter: blur(10px); /* Slightly reduced for better performance/clarity */
       z-index: 1;
       border-left: 1px solid var(--borde);
       pointer-events: none;
@@ -352,7 +352,7 @@
 
     .nav-links-content {
       position: relative;
-      z-index: 2;
+      z-index: 10; /* Significant jump to ensure separation */
       display: flex;
       flex-direction: column;
       padding: 6rem 2rem 2rem;
@@ -373,8 +373,12 @@
       width: 100%;
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       transition: all 0.3s ease;
-      color: var(--blanco); /* Ensure color is solid */
+      color: var(--blanco);
       text-decoration: none;
+      /* Hardware Acceleration & Isolation */
+      transform: translateZ(0); 
+      will-change: transform;
+      -webkit-font-smoothing: antialiased;
     }
 
     .nav-links-content a:hover {
