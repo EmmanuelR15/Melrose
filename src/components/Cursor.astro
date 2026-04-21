@@ -7,7 +7,7 @@
 <script>
   import { gsap } from 'gsap';
 
-  document.addEventListener('DOMContentLoaded', () => {
+  const initCursor = () => {
     // Only run on non-touch devices
     if (window.matchMedia('(pointer: coarse)').matches) return;
 
@@ -22,33 +22,50 @@
     const yTo = gsap.quickTo(cursor, "y", {duration: 0.3, ease: "power3"});
     const scaleTo = gsap.quickTo(cursor, "scale", {duration: 0.3, ease: "power3.out"});
 
-    window.addEventListener("mousemove", (e) => {
+    const handleMouseMove = (e) => {
+      // Check if cursor still exists in DOM before animating
+      if (!document.getElementById('customCursor')) return;
+      
       xTo(e.clientX);
       yTo(e.clientY);
-      // Ensure cursor is visible after first move
+      
       if (cursor.style.opacity === "0" || cursor.style.opacity === "") {
         gsap.to(cursor, {opacity: 1, duration: 0.2});
       }
-    });
+    };
 
-    // Expand on links and buttons
     const handleMouseOver = (e) => {
+      if (!document.getElementById('customCursor')) return;
+      
       const target = e.target as HTMLElement;
+      if (!target) return;
+      
       const isClickable = target.closest('a') || target.closest('button') || target.classList.contains('interactive');
       if (isClickable) {
         scaleTo(2.5);
         cursor.classList.add('active');
-        
-        // Minor magnetic effect to center of element if it's a small button
-        /* We'll skip complex magnetism to avoid conflicts, just visual expansion */
       } else {
         scaleTo(1);
         cursor.classList.remove('active');
       }
     };
 
+    window.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseover", handleMouseOver);
-  });
+
+    // Cleanup function for Astro transitions
+    const cleanup = () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseover", handleMouseOver);
+      gsap.killTweensOf(cursor);
+      console.log("🧹 Cleanup: Cursor listeners and animations stopped");
+    };
+
+    document.addEventListener('astro:before-preparation', cleanup, { once: true });
+  };
+
+  // Run on first load and after each page transition
+  document.addEventListener('astro:page-load', initCursor);
 </script>
 
 <style>
