@@ -9,14 +9,17 @@
     </a>
     
     <div class="nav-links" id="navLinks">
-      <a href="/#productos" data-category="TODO">SHOP</a>
-      <a href="/#lookbook">LOOKBOOK</a>
-      <a href="/#nosotros">NOSOTROS</a>
-      <a href="/#ubicacion">CONTACTO</a>
-      <a href="/favoritos" class="nav-link-wishlist">
-        FAVORITOS
-        <span class="wishlist-badge" id="wishlistBadge">0</span>
-      </a>
+      <div class="nav-links-backdrop"></div>
+      <div class="nav-links-content">
+        <a href="/#productos" data-category="TODO">SHOP</a>
+        <a href="/#lookbook">LOOKBOOK</a>
+        <a href="/#nosotros">NOSOTROS</a>
+        <a href="/#ubicacion">CONTACTO</a>
+        <a href="/favoritos" class="nav-link-wishlist">
+          FAVORITOS
+          <span class="wishlist-badge" id="wishlistBadge">0</span>
+        </a>
+      </div>
     </div>
 
     <div class="nav-right">
@@ -158,6 +161,16 @@
   }
 
   .nav-links {
+    display: flex;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  .nav-links-backdrop {
+    display: none;
+  }
+
+  .nav-links-content {
     display: flex;
     gap: 3rem;
     align-items: center;
@@ -305,10 +318,6 @@
       padding: 0 4%;
     }
 
-    .hamburger {
-      display: flex;
-    }
-
     .nav-links {
       position: fixed;
       top: 0;
@@ -316,48 +325,55 @@
       width: 280px;
       height: 100vh;
       height: 100dvh;
-      background: none; /* Removed to use pseudo-element */
-      backdrop-filter: none; /* Removed to use pseudo-element */
-      flex-direction: column;
-      gap: 0;
-      padding: 6rem 2rem 2rem;
+      background: none;
+      backdrop-filter: none;
       transform: translateX(100%);
       transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       z-index: 2000;
-      align-items: flex-start;
-      border-left: none; /* Moved to pseudo-element */
-      isolation: isolate; /* Create a stacking context for children */
+      display: block; /* Change from flex to block to contain sibling anchors */
+      border-left: none;
+      isolation: isolate;
     }
 
-    .nav-links::after {
-      content: '';
+    .nav-links-backdrop {
+      display: block;
       position: absolute;
       inset: 0;
-      background: rgba(10, 10, 10, 0.98);
-      backdrop-filter: blur(12px);
-      z-index: -1;
+      background: rgba(10, 10, 10, 0.96);
+      backdrop-filter: blur(15px);
+      z-index: 1;
       border-left: 1px solid var(--borde);
       pointer-events: none;
+    }
+
+    .nav-links-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      padding: 6rem 2rem 2rem;
+      width: 100%;
+      height: 100%;
+      gap: 0;
+      align-items: flex-start;
     }
 
     .nav-links.active {
       transform: translateX(0);
     }
 
-    .nav-links a {
+    .nav-links-content a {
       font-size: 1rem;
       letter-spacing: 0.15em;
       padding: 1rem 0;
       width: 100%;
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       transition: all 0.3s ease;
+      color: var(--blanco); /* Ensure color is solid */
+      text-decoration: none;
     }
 
-    .nav-links a::before {
-      display: none;
-    }
-
-    .nav-links a:hover {
+    .nav-links-content a:hover {
       padding-left: 1rem;
       color: var(--rojo);
     }
