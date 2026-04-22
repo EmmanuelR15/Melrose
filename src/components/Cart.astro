@@ -40,26 +40,50 @@
       if (cartOverlay) cartOverlay.onclick = () => this.closeCart();
       if (checkoutBtn) checkoutBtn.onclick = () => this.checkout();
 
-      // Add to cart buttons
+      // Add to cart buttons (global click listener)
       if (!window.cartListenerAdded) {
         document.addEventListener('click', (e) => {
-          const btn = e.target.closest('.btn-agregar') || e.target.closest('.add-to-cart');
+          const btn = e.target.closest('.btn-agregar') || e.target.closest('.add-to-cart') || e.target.closest('.add-to-cart-btn');
           if (btn) {
-            this.addToCart(btn);
+            // Only handle buttons that DON'T have a custom handler (like the one in [id].astro which dispatches an event)
+            if (!btn.hasAttribute('onclick')) {
+              this.addToCart(btn);
+            }
           }
         });
+
+        // Listen for custom addToCart event (from detail page)
+        document.addEventListener('addToCart', (e) => {
+          console.log('Evento addToCart capturado:', e.detail);
+          this.addToCart(null, e.detail);
+        });
+
         window.cartListenerAdded = true;
       }
     }
 
-    addToCart(button) {
-      const productId = String(button.dataset.id);
-      const productName = button.dataset.name || 'Producto';
-      const productImage = button.dataset.image || 'https://images.unsplash.com/photo-1552902865-b72c031ac5ea?q=80&w=200&auto=format&fit=crop';
-      const stock = parseInt(button.dataset.stock) || 0;
-      const productPrice = parseFloat(button.dataset.price) || 0;
+    addToCart(button, customData = null) {
+      let productId, productName, productImage, stock, productPrice, size;
 
-      const itemExistente = this.cart.find(i => String(i.id) === productId);
+      if (customData) {
+        productId = String(customData.id);
+        productName = customData.name;
+        productPrice = parseFloat(customData.price);
+        stock = parseInt(customData.stock);
+        productImage = customData.image || 'https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=200';
+        size = customData.size || 'N/A';
+      } else {
+        productId = String(button.dataset.id);
+        productName = button.dataset.name || 'Producto';
+        productImage = button.dataset.image || 'https://images.unsplash.com/photo-1552902865-b72c031ac5ea?q=80&w=200&auto=format&fit=crop';
+        stock = parseInt(button.dataset.stock) || 0;
+        productPrice = parseFloat(button.dataset.price) || 0;
+        size = button.dataset.size || 'Único';
+      }
+
+      // Unique key for the item (ID + Size)
+      const cartKey = `${productId}-${size}`;
+      const itemExistente = this.cart.find(i => (i.cartKey || `${i.id}-${i.size || 'Único'}`) === cartKey);
       const cantidadActual = itemExistente ? parseInt(itemExistente.quantity) : 0;
 
       if (cantidadActual >= stock) {
@@ -67,18 +91,19 @@
         return;
       }
 
-      const item = {
-        id: productId,
-        name: productName,
-        price: productPrice,
-        stock: stock,
-        image: productImage,
-        quantity: 1
-      };
-
       if (itemExistente) {
         itemExistente.quantity++;
       } else {
+        const item = {
+          id: productId,
+          cartKey: cartKey,
+          name: productName,
+          price: productPrice,
+          stock: stock,
+          image: productImage,
+          size: size,
+          quantity: 1
+        };
         this.cart.push(item);
       }
 
@@ -87,14 +112,14 @@
       this.openCart();
     }
 
-    removeFromCart(productId) {
-      this.cart = this.cart.filter(p => String(p.id) !== String(productId));
+    removeFromCart(cartKey) {
+      this.cart = this.cart.filter(p => (p.cartKey || `${p.id}-${p.size || 'Único'}`) !== String(cartKey));
       this.save();
       this.updateUI();
     }
 
-    updateQuantity(productId, quantity) {
-      const item = this.cart.find(p => String(p.id) === String(productId));
+    updateQuantity(cartKey, quantity) {
+      const item = this.cart.find(p => (p.cartKey || `${p.id}-${p.size || 'Único'}`) === String(cartKey));
       if (item) {
         const newQty = Math.max(1, Math.min(parseInt(quantity), item.stock));
         item.quantity = newQty;
@@ -121,31 +146,46 @@
 
       if (itemsContainer) {
         itemsContainer.innerHTML = this.cart.length
-          ? this.cart.map(item => `
+          ? this.cart.map(item => {
+              const currentKey = item.cartKey || `${item.id}-${item.size || 'Único'}`;
+              return `
               <div class="cart-item">
                 <img src="${item.image || 'https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=200'}" alt="${item.name}" class="cart-item-img" />
                 <div class="cart-item-details">
                   <h4>${item.name}</h4>
+                  <p class="item-size">TALLE: ${item.size || 'ÚNICO'}</p>
                   <p class="item-price">$ ${item.price.toLocaleString('es-AR')}</p>
                 </div>
                 <div class="item-controls">
-                  <input type="number" value="${item.quantity}" min="1" max="${item.stock || 10}" data-id="${item.id}" class="qty-input">
-                  <button class="remove-btn" data-id="${item.id}">Retirar</button>
+                  <div class="qty-selector">
+                    <button class="qty-btn minus" data-key="${currentKey}">-</button>
+                    <span class="qty-value">${item.quantity}</span>
+                    <button class="qty-btn plus" data-key="${currentKey}">+</button>
+                  </div>
+                  <button class="remove-btn" data-key="${currentKey}">Retirar</button>
                 </div>
               </div>
-            `).join('')
+            `}).join('')
           : '<p class="empty-cart">Tu carrito está vacío</p>';
 
-        // Add event listeners to quantity inputs and remove buttons
-        itemsContainer.querySelectorAll('.qty-input').forEach(input => {
-          input.addEventListener('change', (e) => {
-            this.updateQuantity(e.target.dataset.id, parseInt(e.target.value));
-          });
+        // Add event listeners to quantity buttons and remove buttons
+        itemsContainer.querySelectorAll('.plus').forEach(btn => {
+          btn.onclick = () => {
+            const item = this.cart.find(p => (p.cartKey || `${p.id}-${p.size || 'Único'}`) === btn.dataset.key);
+            if (item) this.updateQuantity(btn.dataset.key, item.quantity + 1);
+          };
+        });
+
+        itemsContainer.querySelectorAll('.minus').forEach(btn => {
+          btn.onclick = () => {
+            const item = this.cart.find(p => (p.cartKey || `${p.id}-${p.size || 'Único'}`) === btn.dataset.key);
+            if (item) this.updateQuantity(btn.dataset.key, item.quantity - 1);
+          };
         });
 
         itemsContainer.querySelectorAll('.remove-btn').forEach(btn => {
           btn.addEventListener('click', (e) => {
-            this.removeFromCart(e.target.dataset.id);
+            this.removeFromCart(btn.dataset.key);
           });
         });
       }
@@ -183,7 +223,7 @@
       this.closeCart();
 
       const cartText = this.cart
-        .map(item => `• ${item.name} (x${item.quantity}) - $ ${(parseFloat(item.price) * parseInt(item.quantity)).toLocaleString('es-AR')}`)
+        .map(item => `• ${item.name} (${item.size || 'ÚNICO'}) x${item.quantity} - $ ${(parseFloat(item.price) * parseInt(item.quantity)).toLocaleString('es-AR')}`)
         .join('\n');
 
       const total = this.cart.reduce((sum, item) => sum + (parseFloat(item.price) * parseInt(item.quantity)), 0);
@@ -264,9 +304,13 @@
 .cart-item-img { width: 72px; height: 72px; object-fit: cover; border-radius: 5px; display: block; }
 .cart-item-details { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
 .cart-item-details h4 { font-size: 0.8rem; font-weight: 600; color: #fff; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item-size { font-size: 0.65rem; color: #888; letter-spacing: 0.1em; margin: 0.1rem 0; font-weight: 500; }
 .item-price { font-size: 0.85rem; color: #e05a2b; font-weight: 700; margin: 0; }
-.item-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; }
-.qty-input { width: 48px; background: #222; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #fff; font-size: 0.8rem; text-align: center; padding: 0.25rem; }
+.item-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 0.75rem; }
+.qty-selector { display: flex; align-items: center; background: #222; border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; height: 28px; }
+.qty-btn { background: none; border: none; color: #888; width: 24px; height: 100%; cursor: pointer; transition: all 0.2s; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; }
+.qty-btn:hover { background: #333; color: #fff; }
+.qty-value { font-size: 0.8rem; color: #fff; min-width: 24px; text-align: center; font-weight: 600; border-left: 1px solid rgba(255,255,255,0.05); border-right: 1px solid rgba(255,255,255,0.05); }
 .remove-btn { background: none; border: none; color: #555; font-size: 0.7rem; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; transition: color 0.2s; padding: 0; white-space: nowrap; }
 .remove-btn:hover { color: #e05a2b; }
 .empty-cart { color: #555; font-size: 0.85rem; text-align: center; margin-top: 3rem; letter-spacing: 0.05em; }

@@ -195,11 +195,13 @@ if (product?.image_back && !productImages.includes(product.image_back)) {
 
             <div class="product-actions">
               <button 
+                id="addToCartBtn"
                 class="btn-primary add-to-cart-btn"
                 data-id={product.id}
                 data-name={product.nombre}
                 data-price={product.precio}
                 data-stock={product.stock}
+                disabled
                 onclick="addToCartFromDetail(this)"
               >
                 AGREGAR AL CARRITO
@@ -275,6 +277,22 @@ if (product?.image_back && !productImages.includes(product.image_back)) {
 </Layout>
 
 <script>
+  // Control de talle y habilitación de botón
+  const sizeSelect = document.getElementById('sizeSelect');
+  const addToCartBtn = document.getElementById('addToCartBtn');
+
+  if (sizeSelect && addToCartBtn) {
+    sizeSelect.addEventListener('change', () => {
+      if (sizeSelect.value) {
+        addToCartBtn.disabled = false;
+        addToCartBtn.classList.add('enabled');
+      } else {
+        addToCartBtn.disabled = true;
+        addToCartBtn.classList.remove('enabled');
+      }
+    });
+  }
+
   // Cambiar imagen principal
   function changeMainImage(imageSrc) {
     const mainImage = document.getElementById('mainProductImage');
@@ -483,10 +501,21 @@ if (product?.image_back && !productImages.includes(product.image_back)) {
     background: var(--rojo);
     color: var(--blanco);
     border: none;
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(1);
   }
 
-  .add-to-cart-btn:hover {
+  .add-to-cart-btn.enabled {
+    opacity: 1;
+    cursor: pointer;
+    filter: none;
+  }
+
+  .add-to-cart-btn.enabled:hover {
     background: var(--rojo-oscuro);
+    box-shadow: 0 0 20px rgba(192, 57, 43, 0.4);
+    transform: translateY(-2px);
   }
 
   .whatsapp-btn {
