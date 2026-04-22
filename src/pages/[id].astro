@@ -172,12 +172,16 @@ if (product?.image_back && !productImages.includes(product.image_back)) {
               <div class="size-selector">
                 <label>TALLE</label>
                 <select id="sizeSelect">
-                  <option value="">Seleccionar talle</option>
-                  <option value="XS">XS</option>
-                  <option value="S">S</option>
-                  <option value="M">M</option>
-                  <option value="L">L</option>
-                  <option value="XL">XL</option>
+                  {product?.talles && Array.isArray(product.talles) && product.talles.length > 0 ? (
+                    <>
+                      <option value="">Seleccionar talle</option>
+                      {product.talles.map((talle) => (
+                        <option value={talle}>{talle}</option>
+                      ))}
+                    </>
+                  ) : (
+                    <option value="">Sin stock de talles</option>
+                  )}
                 </select>
               </div>
 
