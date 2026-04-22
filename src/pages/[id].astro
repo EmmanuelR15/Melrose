@@ -29,18 +29,36 @@ try {
       product = productData;
     }
 
-    // Productos relacionados (misma categoría, solo con stock)
+    // Productos recomendados (misma categoría primero, luego otros)
     if (product) {
-      const { data: relatedData } = await supabase
+      // 1. Intentar obtener de la misma categoría
+      const { data: catData } = await supabase
         .from('productos')
         .select('*')
         .eq('categoria', product.categoria)
         .neq('id', id)
-        .gt('stock', 0) // Solo productos con stock disponible
+        .gt('stock', 0)
         .order('created_at', { ascending: false })
         .limit(4);
 
-      relatedProducts = relatedData || [];
+      let results = catData || [];
+
+      // 2. Si hay menos de 4, rellenar con otros aleatorios
+      if (results.length < 4) {
+        const { data: othersData } = await supabase
+          .from('productos')
+          .select('*')
+          .neq('id', id)
+          .neq('categoria', product.categoria)
+          .gt('stock', 0)
+          .limit(4 - results.length);
+        
+        if (othersData) {
+          results = [...results, ...othersData];
+        }
+      }
+
+      relatedProducts = results;
     }
   }
 } catch (err) {
@@ -251,32 +269,18 @@ if (product?.image_back && !productImages.includes(product.image_back)) {
           </div>
         </section>
 
-        {/* Productos Relacionados */}
+        {/* Productos Recomendados */}
         {relatedProducts.length > 0 && (
           <section class="related-products">
             <div class="container">
               <div class="section-header">
-                <h2>COMBINÁ CON</h2>
-                <p>Productos similares que te pueden gustar</p>
-              </div>
-              <div class="related-products-info">
-                <div class="related-products-count">
-                  <span>{relatedProducts.length} productos disponibles</span>
-                </div>
-                <div class="related-products-badge">
-                  <span>STOCK DISPONIBLE</span>
-                </div>
+                <h2>TAMBIÉN TE PUEDE GUSTAR</h2>
+                <div class="header-line"></div>
               </div>
               <div class="products-grid related-grid">
                 {relatedProducts.map((relatedProduct) => (
-                  <ProductCard product={relatedProduct} client:load />
+                  <ProductCard product={relatedProduct} />
                 ))}
-              </div>
-              <div class="related-footer">
-                <a href="#productos" class="btn-secondary">VER TODO EL CATÁLOGO</a>
-                <div class="related-footer-text">
-                  <span>o explorá por categorías</span>
-                </div>
               </div>
             </div>
           </section>
@@ -803,61 +807,35 @@ if (product?.image_back && !productImages.includes(product.image_back)) {
       gap: 1rem;
     }
 
-    .related-products .section-header h2 {
-      font-size: 1.8rem;
-    }
-  }
-
-  .related-products-info {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-  }
-
-  .related-products-count {
-    text-align: center;
-  }
-
-  .related-products-count span {
-    color: var(--gris);
-    font-size: 0.9rem;
-    opacity: 0.8;
-    padding: 0.5rem 1rem;
+  /* Recomendados Section */
+  .related-products {
+    padding: 6rem 0;
     background: var(--negro);
-    border: 1px solid var(--borde);
-    border-radius: 20px;
-    display: inline-block;
+    border-top: 1px solid var(--borde);
   }
 
-  .related-products-badge {
+  .related-products .section-header {
+    margin-bottom: 4rem;
     text-align: center;
   }
 
-  .related-products-badge span {
+  .related-products .section-header h2 {
+    font-size: clamp(2rem, 5vw, 2.8rem);
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 0.15em;
+    margin-bottom: 1.5rem;
     color: var(--blanco);
-    font-size: 0.8rem;
-    font-weight: 600;
-    padding: 0.4rem 0.8rem;
+  }
+
+  .header-line {
+    width: 60px;
+    height: 2px;
     background: var(--rojo);
-    border: 1px solid var(--rojo);
-    border-radius: 15px;
-    display: inline-block;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    margin: 0 auto;
   }
 
-  .related-footer {
-    text-align: center;
-    margin-top: 3rem;
-  }
-
-  .related-footer .btn-secondary {
-    display: inline-block;
-    text-decoration: none;
-    margin-bottom: 1rem;
+  .related-grid {
+    margin-top: 2rem;
   }
 
   .related-footer-text {

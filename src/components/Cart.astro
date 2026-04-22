@@ -56,6 +56,11 @@
           this.addToCart(null, e.detail);
         });
 
+        // Listen for explicit openCart event
+        document.addEventListener('openCart', () => {
+          this.openCart();
+        });
+
         window.cartListenerAdded = true;
       }
     }
@@ -207,8 +212,10 @@
 
     openCart() {
       const drawer = document.getElementById('cartDrawer');
-      drawer?.classList.add('active');
-      document.body.style.overflow = 'hidden';
+      if (drawer) {
+        drawer.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
     }
 
     closeCart() {
