@@ -34,6 +34,7 @@ const formatter = new Intl.NumberFormat('es-AR', {
       data-price={product.precio}
       data-image={product.imagen_url}
       data-category={product.categoria}
+      data-sizes={JSON.stringify(product.talles || [])}
       aria-label="Agregar a favoritos"
     >
       <svg class="heart-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -413,14 +414,14 @@ const formatter = new Intl.NumberFormat('es-AR', {
   }
 
   /* Mobile responsive */
-  @media (max-width: 768px) {
-    .product-image-wrap {
-      height: 200px;
+    .btn-agregar {
+      padding: 15px 20px;
+      font-size: 1.2rem;
     }
 
     .wishlist-btn {
-      width: 32px;
-      height: 32px;
+      width: 44px;
+      height: 44px;
       top: 0.5rem;
       right: 0.5rem;
     }

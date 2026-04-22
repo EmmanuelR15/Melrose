@@ -214,16 +214,7 @@ if (product?.image_back && !productImages.includes(product.image_back)) {
                 </select>
               </div>
 
-              <div class="quantity-selector">
-                <label>CANTIDAD</label>
-                <input 
-                  type="number" 
-                  id="quantityInput"
-                  min="1" 
-                  max={product.stock} 
-                  value="1" 
-                />
-              </div>
+              <!-- Quantity Selector Removed for simpler stock management -->
             </div>
 
             <div class="product-actions">
@@ -239,6 +230,20 @@ if (product?.image_back && !productImages.includes(product.image_back)) {
                 disabled={product.talles && product.talles.length > 0}
               >
                 AGREGAR AL CARRITO
+              </button>
+
+              <button 
+                class="wishlist-btn"
+                data-id={product.id}
+                data-name={product.nombre}
+                data-price={product.precio}
+                data-image={productImages[0]}
+                data-category={product.categoria}
+                data-stock={product.stock}
+                data-sizes={JSON.stringify(product.talles || [])}
+                aria-label="Agregar a favoritos"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
               </button>
 
               <button 
@@ -337,7 +342,7 @@ if (product?.image_back && !productImages.includes(product.image_back)) {
         return;
       }
 
-      // Preparar datos para el carrito
+      // Preparar datos para el carrito (Siempre 1 unidad por clic)
       const cartData = {
         id: addToCartBtn.dataset.id,
         name: addToCartBtn.dataset.name,
@@ -345,7 +350,7 @@ if (product?.image_back && !productImages.includes(product.image_back)) {
         stock: parseInt(addToCartBtn.dataset.stock),
         image: addToCartBtn.dataset.image,
         size: sizeSelect.value || addToCartBtn.dataset.size || 'Único',
-        quantity: parseInt(quantityInput?.value || "1")
+        quantity: 1
       };
 
       console.log('📦 Melrose Admin: Agregando al carrito:', cartData);

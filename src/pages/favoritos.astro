@@ -186,6 +186,60 @@ import { supabase } from '../lib/supabase.js';
     border-color: var(--rojo);
   }
 
+  /* Wishlist Size chips styling */
+  :global(.item-sizes-mini) {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  :global(.size-label) {
+    font-size: 0.7rem;
+    color: var(--gris);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.1em;
+  }
+
+  :global(.size-chips-wishlist) {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  :global(.size-chip-wish) {
+    background: transparent;
+    border: 1px solid var(--borde);
+    color: var(--blanco);
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 2px;
+  }
+
+  :global(.size-chip-wish:hover) {
+    border-color: var(--rojo);
+    color: var(--rojo);
+  }
+
+  :global(.size-chip-wish.active) {
+    background: var(--rojo);
+    border-color: var(--rojo);
+    color: var(--blanco);
+  }
+
+  :global(.add-to-cart-wish.enabled) {
+    background: var(--rojo) !important;
+    cursor: pointer !important;
+    opacity: 1 !important;
+  }
+
+  :global(.add-to-cart-wish:disabled) {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--gris-oscuro);
+  }
+
   .btn-back {
     display: inline-block;
     color: var(--gris);
