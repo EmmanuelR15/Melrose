@@ -314,3 +314,36 @@ h3 {
   background: var(--blanco);
   color: var(--negro);
 }
+
+/* Efecto Aura Melrose */
+.bg-aura {
+  position: relative;
+  background: #050505; /* Un negro un pelín más claro para que haya contraste */
+  overflow: hidden;
+}
+
+.bg-aura::after {
+  content: "";
+  position: absolute;
+  top: -20%;
+  right: -10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(255, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0) 70%);
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.bg-aura::before {
+  content: "";
+  position: absolute;
+  bottom: -10%;
+  left: -10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0) 70%);
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 1;
+}
