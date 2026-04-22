@@ -170,7 +170,18 @@ if (product?.image_back && !productImages.includes(product.image_back)) {
 
             <div class="product-options">
               <div class="size-selector">
-                <label>TALLE</label>
+                <div class="label-row">
+                  <label>TALLE</label>
+                  <button id="openSizeGuide" class="size-guide-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 10H2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2z"/>
+                      <path d="M7 10v4"/>
+                      <path d="M12 10v2"/>
+                      <path d="M17 10v4"/>
+                    </svg>
+                    Ver guía de talles
+                  </button>
+                </div>
                 <select id="sizeSelect">
                   {product?.talles && Array.isArray(product.talles) && product.talles.length > 0 ? (
                     <>
@@ -344,6 +355,40 @@ if (product?.image_back && !productImages.includes(product.image_back)) {
     });
   }
 
+  // Lógica Guía de Talles
+  const openBtn = document.getElementById('openSizeGuide');
+  const closeBtn = document.getElementById('closeSizeGuide');
+  const modal = document.getElementById('sizeGuideModal');
+
+  if (openBtn && modal) {
+    const closeModal = () => {
+      modal.classList.remove('active');
+      setTimeout(() => {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+      }, 300);
+    };
+
+    openBtn.onclick = () => {
+      modal.style.display = 'flex';
+      setTimeout(() => modal.classList.add('active'), 10);
+      document.body.style.overflow = 'hidden';
+    };
+
+    if (closeBtn) closeBtn.onclick = closeModal;
+
+    modal.onclick = (e) => {
+      if (e.target === modal) closeModal();
+    };
+
+    // Cerrar con Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('active')) {
+        closeModal();
+      }
+    });
+  }
+
   // Compra directa por WhatsApp
   function buyOnWhatsApp(product) {
     const sizeSelect = document.getElementById('sizeSelect');
@@ -464,17 +509,149 @@ if (product?.image_back && !productImages.includes(product.image_back)) {
 
   .product-options {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
+    margin-bottom: 2rem;
   }
 
-  .product-options label {
-    display: block;
+  .label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+  }
+
+  .size-guide-btn {
+    background: none;
+    border: none;
     color: var(--gris);
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .size-guide-btn:hover {
+    color: var(--blanco);
+  }
+
+  .size-selector label,
+  .quantity-selector label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--gris);
+    letter-spacing: 0.1em;
+    margin: 0;
+  }
+
+  /* Modal Guía de Talles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+    opacity: 1;
+  }
+
+  .modal-content {
+    background: var(--negro);
+    border: 1px solid var(--borde);
+    padding: 2.5rem;
+    max-width: 500px;
+    width: 95%;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+  }
+
+  .modal-overlay.active .modal-content {
+    transform: translateY(0);
+  }
+
+  .close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: var(--blanco);
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .modal-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .modal-header h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.2rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.3rem;
+  }
+
+  .modal-header .subtitle {
+    font-size: 0.8rem;
+    color: var(--rojo);
+    letter-spacing: 0.1em;
+    font-weight: 700;
+  }
+
+  .table-container {
+    margin-bottom: 2rem;
+    overflow-x: auto;
+  }
+
+  .table-container table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  .table-container th, 
+  .table-container td {
+    padding: 1rem;
+    text-align: center;
+    border: 1px solid var(--borde);
+  }
+
+  .table-container th {
+    background: rgba(255, 255, 255, 0.05);
+    font-weight: 700;
+    color: var(--gris);
+  }
+
+  .modal-footer {
+    text-align: center;
+  }
+
+  .modal-footer p {
+    font-size: 0.8rem;
+    color: var(--gris);
+    line-height: 1.6;
+    max-width: 400px;
+    margin: 0 auto;
   }
 
   .product-options select,
