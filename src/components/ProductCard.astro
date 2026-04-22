@@ -8,6 +8,7 @@ interface Props {
     categoria: string;
     descripcion?: string;
     stock: number;
+    talles?: string[]; 
     image_back?: string;
   }
 }
@@ -47,11 +48,62 @@ const formatter = new Intl.NumberFormat('es-AR', {
       <p class="product-category">{product.categoria}</p>
     </div>
     <p class="product-price">{formatter.format(product.precio)}</p>
-    <button class={`btn-agregar ${product.stock === 1 ? 'ultima-unidad' : ''}`} data-id={product.id} data-price={product.precio} data-name={product.nombre} data-stock={product.stock} data-image={product.imagen_url}>
+
+    {product.talles && product.talles.length > 0 && (
+      <div class="product-sizes">
+        {product.talles.map(t => (
+          <button class="size-chip" data-size={t}>{t}</button>
+        ))}
+      </div>
+    )}
+
+    <button 
+      class={`btn-agregar ${product.stock === 1 ? 'ultima-unidad' : ''} ${(!product.talles || product.talles.length === 0) ? 'enabled' : ''}`} 
+      data-id={product.id} 
+      data-price={product.precio} 
+      data-name={product.nombre} 
+      data-stock={product.stock} 
+      data-image={product.imagen_url}
+      data-size={(!product.talles || product.talles.length === 0) ? 'Único' : ''}
+      disabled={product.talles && product.talles.length > 0}
+    >
       {product.stock === 1 ? 'ÚLTIMA UNIDAD' : 'AGREGAR'}
     </button>
   </div>
 </article>
+
+<script>
+  function initProductCards() {
+    document.querySelectorAll('.product-card').forEach(card => {
+      const sizeButtons = card.querySelectorAll('.size-chip');
+      const addBtn = card.querySelector('.btn-agregar');
+
+      sizeButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          // Desactivar otros del mismo card
+          sizeButtons.forEach(b => b.classList.remove('active'));
+          
+          // Activar este
+          btn.classList.add('active');
+          
+          // Habilitar botón agregar y setear talle
+          if (addBtn) {
+            addBtn.disabled = false;
+            addBtn.classList.add('enabled');
+            addBtn.dataset.size = btn.dataset.size;
+          }
+        });
+      });
+    });
+  }
+
+  // Soporte para View Transitions
+  document.addEventListener('astro:page-load', initProductCards);
+  initProductCards();
+</script>
 
 <style>
   .product-card {
@@ -208,9 +260,42 @@ const formatter = new Intl.NumberFormat('es-AR', {
   }
 
   .product-price {
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: 1rem;
+    font-weight: 700;
     color: var(--blanco);
+    letter-spacing: 0.05em;
+  }
+
+  .product-sizes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.2rem 0 0.5rem;
+  }
+
+  .size-chip {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--gris);
+    font-size: 0.7rem;
+    padding: 0.3rem 0.6rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .size-chip:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    color: var(--blanco);
+  }
+
+  .size-chip.active {
+    background: var(--blanco);
+    color: var(--negro);
+    border-color: var(--blanco);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
   }
 
   .add-to-cart {
@@ -259,19 +344,27 @@ const formatter = new Intl.NumberFormat('es-AR', {
     border: none;
     padding: 10px 20px;
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 1rem;
+    font-size: 1.1rem;
     letter-spacing: 0.1em;
-    cursor: pointer;
+    cursor: not-allowed;
     width: 100%;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
+    opacity: 0.4;
+    filter: grayscale(1);
+    text-transform: uppercase;
   }
 
-  .btn-agregar:hover {
-    background: #a02e22;
-    box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
-    /* translateY only so GSAP handles scale smoothly */
+  .btn-agregar.enabled {
+    opacity: 1;
+    filter: none;
+    cursor: pointer;
+  }
+
+  .btn-agregar.enabled:hover {
+    background: #FF2D1A;
+    box-shadow: 0 0 25px rgba(192, 57, 43, 0.5);
     transform: translateY(-2px);
   }
 

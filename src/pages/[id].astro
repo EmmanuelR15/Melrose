@@ -200,13 +200,14 @@ if (product?.image_back && !productImages.includes(product.image_back)) {
             <div class="product-actions">
               <button 
                 id="addToCartBtn"
-                class="btn-primary add-to-cart-btn"
+                class={`btn-primary add-to-cart-btn ${(!product.talles || product.talles.length === 0) ? 'enabled' : ''}`}
                 data-id={product.id}
                 data-name={product.nombre}
                 data-price={product.precio}
                 data-stock={product.stock}
                 data-image={productImages[0]}
-                disabled
+                data-size={(!product.talles || product.talles.length === 0) ? 'Único' : ''}
+                disabled={product.talles && product.talles.length > 0}
               >
                 AGREGAR AL CARRITO
               </button>
@@ -328,7 +329,7 @@ if (product?.image_back && !productImages.includes(product.image_back)) {
         price: parseFloat(addToCartBtn.dataset.price),
         stock: parseInt(addToCartBtn.dataset.stock),
         image: addToCartBtn.dataset.image,
-        size: sizeSelect.value,
+        size: sizeSelect.value || addToCartBtn.dataset.size || 'Único',
         quantity: parseInt(quantityInput?.value || "1")
       };
 
