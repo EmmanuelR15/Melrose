@@ -1,5 +1,5 @@
 ---
-// About section - Editorial layout with red vertical line, 3 columns, and full-height image
+// About section - Editorial layout with optimized spacing
 ---
 
 <section class="about" id="nosotros">
@@ -14,21 +14,21 @@
             <span class="col-number">01</span>
             <h3 class="col-title">HISTORIA</h3>
             <p class="reveal-text">Nacimos en 2026 con la visión de redefinir el streetwear argentino.</p>
-            <p class="reveal-text">Cada prenda refleja nuestra pasión por la cultura urbana y el diseño auténtico.</p>
+            <p class="reveal-text">Cada prenda refleja nuestra pasión por la cultura urbana.</p>
           </div>
 
           <div class="about-col">
             <span class="col-number">02</span>
             <h3 class="col-title">FILOSOFÍA</h3>
             <p class="reveal-text">Creemos que la moda es una extensión de la identidad personal.</p>
-            <p class="reveal-text">No seguimos tendencias efímeras: creamos piezas que trascienden temporadas.</p>
+            <p class="reveal-text">No seguimos tendencias: creamos piezas que trascienden.</p>
           </div>
 
           <div class="about-col">
             <span class="col-number">03</span>
             <h3 class="col-title">COMPROMISO</h3>
-            <p class="reveal-text">Materiales premium, producción consciente y atención obsesiva al detalle.</p>
-            <p class="reveal-text">Nuestro compromiso es con la calidad y quienes valoran el buen diseño.</p>
+            <p class="reveal-text">Materiales premium y atención obsesiva al detalle.</p>
+            <p class="reveal-text">Calidad para quienes valoran el diseño auténtico.</p>
           </div>
         </div>
       </div>
@@ -40,28 +40,107 @@
   </div>
 </section>
 
-/* Ajustes en About.astro */
+<style>
+  .about {
+    background-color: var(--negro);
+    overflow: hidden;
+  }
 
-.about-layout {
-  min-height: 450px; /* Antes 600px */
-}
+  .about-layout {
+    display: flex;
+    min-height: 450px; /* Compacto */
+    color: var(--blanco);
+  }
 
-.about-left {
-  padding: 3rem 2rem 3rem 0; /* Antes 5rem 3rem... */
-}
+  .about-left {
+    flex: 1;
+    padding: 3rem 2rem 3rem 0; /* Espaciado reducido */
+    display: flex;
+    position: relative;
+    align-items: center;
+  }
 
-.about-image {
-  flex: 0 0 28%; /* Antes 40% - Imagen más compacta */
-}
+  .red-line {
+    width: 4px;
+    height: 100px;
+    background-color: var(--rojo);
+    margin-right: 2rem;
+  }
 
-.about-columns {
-  gap: 2rem; /* Antes 2.5rem - Puntos más juntos */
-}
+  .about-text-area {
+    width: 100%;
+  }
 
-.about-text-area h2 {
-  margin-bottom: 2rem; /* Antes 3rem */
-}
+  .about-text-area h2 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1.1;
+    margin-bottom: 2rem; /* Compacto */
+    text-transform: uppercase;
+    font-weight: 900;
+  }
 
-.about-image img {
-  height: 110%; /* Antes 120% - Menos desborde vertical */
-}
+  .about-columns {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem; /* Más juntos */
+  }
+
+  .col-number {
+    display: block;
+    color: var(--rojo);
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .col-title {
+    font-size: 1rem;
+    margin-bottom: 0.8rem;
+    letter-spacing: 1px;
+  }
+
+  .reveal-text {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: #ccc;
+    margin-bottom: 0.5rem;
+  }
+
+  .about-image {
+    flex: 0 0 28%; /* Imagen como acento */
+    position: relative;
+    overflow: hidden;
+  }
+
+  .about-image img {
+    width: 100%;
+    height: 110%;
+    object-fit: cover;
+    filter: grayscale(100%);
+    transition: filter 0.5s ease;
+  }
+
+  .about-image:hover img {
+    filter: grayscale(0%);
+  }
+
+  /* Responsive para Mobile */
+  @media (max-width: 768px) {
+    .about-layout {
+      flex-direction: column;
+    }
+    .about-columns {
+      grid-template-columns: 1fr;
+    }
+    .about-image {
+      height: 300px;
+      order: -1;
+    }
+    .about-left {
+      padding: 3rem 1.5rem;
+    }
+    .red-line {
+      display: none;
+    }
+  }
+</style>
